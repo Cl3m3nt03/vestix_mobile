@@ -56,43 +56,90 @@ export function useSparkline(symbol: string | null, name = '', range = '1mo') {
 }
 
 // ── Mutations ───────────────────────────────────────────────────────────────
+const invalidateTx = (qc: ReturnType<typeof useQueryClient>) => {
+  qc.invalidateQueries({ queryKey: ['transactions'] })
+  qc.invalidateQueries({ queryKey: ['stats'] })
+  qc.invalidateQueries({ queryKey: ['assets'] })
+}
+
 export function useAddTransaction() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (body: Record<string, unknown>) => api.post('/api/transactions', body),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['transactions'] })
-      qc.invalidateQueries({ queryKey: ['stats'] })
-      qc.invalidateQueries({ queryKey: ['assets'] })
-    },
+    onSuccess: () => invalidateTx(qc),
   })
+}
+
+export function useEditTransaction() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) => api.patch(`/api/transactions/${id}`, body),
+    onSuccess: () => invalidateTx(qc),
+  })
+}
+
+export function useDeleteTransaction() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: string) => api.del(`/api/transactions/${id}`), onSuccess: () => invalidateTx(qc) })
+}
+
+const invalidateAssets = (qc: ReturnType<typeof useQueryClient>) => {
+  qc.invalidateQueries({ queryKey: ['assets'] })
+  qc.invalidateQueries({ queryKey: ['stats'] })
 }
 
 export function useAddAsset() {
   const qc = useQueryClient()
+  return useMutation({ mutationFn: (body: Record<string, unknown>) => api.post('/api/assets', body), onSuccess: () => invalidateAssets(qc) })
+}
+
+export function useEditAsset() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => api.post('/api/assets', body),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['assets'] })
-      qc.invalidateQueries({ queryKey: ['stats'] })
-    },
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) => api.patch(`/api/assets/${id}`, body),
+    onSuccess: () => invalidateAssets(qc),
   })
+}
+
+export function useDeleteAsset() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: string) => api.del(`/api/assets/${id}`), onSuccess: () => invalidateAssets(qc) })
 }
 
 export function useAddBudgetItem() {
   const qc = useQueryClient()
+  return useMutation({ mutationFn: (body: Record<string, unknown>) => api.post('/api/budget/items', body), onSuccess: () => qc.invalidateQueries({ queryKey: ['budget'] }) })
+}
+
+export function useEditBudgetItem() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => api.post('/api/budget/items', body),
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) => api.patch(`/api/budget/items/${id}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['budget'] }),
   })
 }
 
+export function useDeleteBudgetItem() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: string) => api.del(`/api/budget/items/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['budget'] }) })
+}
+
 export function useAddGoal() {
   const qc = useQueryClient()
+  return useMutation({ mutationFn: (body: Record<string, unknown>) => api.post('/api/goals', body), onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }) })
+}
+
+export function useEditGoal() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => api.post('/api/goals', body),
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) => api.patch(`/api/goals/${id}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }),
   })
+}
+
+export function useDeleteGoal() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: string) => api.del(`/api/goals/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }) })
 }
 
 export function useUpdateProfile() {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
@@ -7,7 +7,7 @@ import { AddButton } from '@/components/ui/AddButton'
 import { FxCard } from '@/components/ui/FxCard'
 import { AddTransaction } from '@/components/forms/AddTransaction'
 import { useTransactions } from '@/lib/queries'
-import type { TxType } from '@/lib/types'
+import type { TxType, Transaction } from '@/lib/types'
 import { eur, dateFr } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
 
@@ -22,10 +22,13 @@ const TX: Record<TxType, { label: string; icon: keyof typeof Feather.glyphMap; c
 export default function Transactions() {
   const q = useTransactions()
   const [add, setAdd] = useState(false)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+
+  const close = () => { setAdd(false); setEditing(null) }
 
   return (
     <AppShell>
-      <AddTransaction visible={add} onClose={() => setAdd(false)} />
+      <AddTransaction visible={add || !!editing} editing={editing} onClose={close} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -45,7 +48,7 @@ export default function Transactions() {
               const meta = TX[t.type]
               const total = (t.price + (t.fees ?? 0)) * (t.quantity ?? 1)
               return (
-                <View key={t.id} style={[styles.row, i > 0 && styles.border]}>
+                <Pressable key={t.id} onPress={() => setEditing(t)} style={[styles.row, i > 0 && styles.border]}>
                   <View style={[styles.ico, { backgroundColor: meta.color + '22' }]}>
                     <Feather name={meta.icon} size={17} color={meta.color} />
                   </View>
@@ -58,7 +61,7 @@ export default function Transactions() {
                   <Text style={[styles.amt, { color: meta.sign > 0 ? color.up : color.ink }]}>
                     {meta.sign > 0 ? '+' : '−'}{eur(total, 2)}
                   </Text>
-                </View>
+                </Pressable>
               )
             })}
           </FxCard>

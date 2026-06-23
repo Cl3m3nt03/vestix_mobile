@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
+import { Feather } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxChip } from '@/components/ui/FxChip'
 import { LineChart } from '@/components/ui/LineChart'
+import { AddAsset } from '@/components/forms/AddAsset'
 import { useAssets, useSparkline } from '@/lib/queries'
 import { eur, CAT } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
@@ -24,13 +26,24 @@ export default function Product() {
   const asset = assets.data?.find((a) => a.id === id)
   const symbol = asset?.holdings?.[0]?.symbol ?? null
   const [range, setRange] = useState('1mo')
+  const [edit, setEdit] = useState(false)
   const spark = useSparkline(symbol, asset?.name ?? '', range)
   const cat = asset ? (CAT[asset.type] ?? CAT.OTHER) : CAT.OTHER
 
   return (
     <AppShell>
+      {asset ? <AddAsset visible={edit} editing={asset} onClose={() => { setEdit(false); if (!assets.data?.find((a) => a.id === id)) router.back() }} /> : null}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ScreenHeader eyebrow={cat.label.toUpperCase()} title={asset?.name ?? 'Actif'} onBack={() => router.back()} />
+        <ScreenHeader
+          eyebrow={cat.label.toUpperCase()}
+          title={asset?.name ?? 'Actif'}
+          onBack={() => router.back()}
+          right={asset ? (
+            <Pressable onPress={() => setEdit(true)} hitSlop={8} style={styles.editBtn}>
+              <Feather name="edit-2" size={18} color={color.acc} />
+            </Pressable>
+          ) : undefined}
+        />
 
         {assets.isLoading ? (
           <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
@@ -98,4 +111,5 @@ const styles = StyleSheet.create({
   name: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   sub: { fontFamily: font.mono, fontSize: 10.5, color: color.inkFaint, marginTop: 2 },
   pnl: { fontFamily: font.bodySemi, fontSize: 14, fontVariant: ['tabular-nums'] },
+  editBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: color.accTint },
 })

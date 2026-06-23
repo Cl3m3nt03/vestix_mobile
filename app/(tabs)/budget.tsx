@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
@@ -8,7 +8,7 @@ import { FxKpi } from '@/components/ui/FxKpi'
 import { Donut, Slice } from '@/components/ui/Donut'
 import { AddBudgetItem } from '@/components/forms/AddBudgetItem'
 import { useBudget } from '@/lib/queries'
-import type { BudgetCategory } from '@/lib/types'
+import type { BudgetCategory, BudgetItem } from '@/lib/types'
 import { eur } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
 
@@ -26,6 +26,8 @@ export default function Budget() {
   const spent = items.reduce((s, it) => s + it.amount, 0)
   const left = income - spent
   const [add, setAdd] = useState(false)
+  const [editing, setEditing] = useState<BudgetItem | null>(null)
+  const close = () => { setAdd(false); setEditing(null) }
 
   const slices: Slice[] = (Object.keys(CATS) as BudgetCategory[])
     .map((c) => ({
@@ -37,7 +39,7 @@ export default function Budget() {
 
   return (
     <AppShell>
-      <AddBudgetItem visible={add} onClose={() => setAdd(false)} />
+      <AddBudgetItem visible={add || !!editing} editing={editing} onClose={close} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -74,11 +76,11 @@ export default function Budget() {
                   <FxCard key={c}>
                     <FxCardHeader title={CATS[c].label} sub={eur(sum)} />
                     {list.map((it, i) => (
-                      <View key={it.id} style={[styles.row, i > 0 && styles.border]}>
+                      <Pressable key={it.id} onPress={() => setEditing(it)} style={[styles.row, i > 0 && styles.border]}>
                         <View style={[styles.dot, { backgroundColor: CATS[c].color }]} />
                         <Text style={styles.name} numberOfLines={1}>{it.label}</Text>
                         <Text style={styles.val}>{eur(it.amount)}</Text>
-                      </View>
+                      </Pressable>
                     ))}
                   </FxCard>
                 )
