@@ -17,6 +17,9 @@ const LINKS: { icon: keyof typeof Feather.glyphMap; label: string; href?: string
   { icon: 'settings', label: 'Réglages', href: '/settings' },
   { icon: 'credit-card', label: 'Comptes bancaires', href: '/bank' },
   { icon: 'message-circle', label: 'Assistant IA', href: '/assistant' },
+  { icon: 'bell', label: 'Alertes de prix', href: '/alerts' },
+  { icon: 'sliders', label: 'Simulateur', href: '/simulator' },
+  { icon: 'award', label: 'Collection TCG', href: '/pokemon' },
 ]
 
 export default function More() {

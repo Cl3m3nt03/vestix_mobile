@@ -3,6 +3,7 @@ import { api } from './api'
 import type {
   PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult,
   Institution, BankConnection, BankTx,
+  HoloStatus, HoloData, PriceAlert,
 } from './types'
 
 export function useMe() {
@@ -138,5 +139,35 @@ export function useSyncBank() {
       qc.invalidateQueries({ queryKey: ['stats'] })
       qc.invalidateQueries({ queryKey: ['assets'] })
     },
+  })
+}
+
+// ── HoloFolio (Pokémon) ──────────────────────────────────────────────────────
+export function useHoloStatus() {
+  return useQuery({ queryKey: ['holo-status'], queryFn: () => api.get<HoloStatus>('/api/holofolio/status') })
+}
+
+export function useHoloData() {
+  return useQuery({ queryKey: ['holo-data'], queryFn: () => api.get<HoloData>('/api/holofolio/data?period=90d') })
+}
+
+// ── Alertes de prix ───────────────────────────────────────────────────────────
+export function useAlerts() {
+  return useQuery({ queryKey: ['alerts'], queryFn: () => api.get<PriceAlert[]>('/api/alerts') })
+}
+
+export function useAddAlert() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => api.post('/api/alerts', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts'] }),
+  })
+}
+
+export function useDeleteAlert() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.del(`/api/alerts/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts'] }),
   })
 }

@@ -125,6 +125,34 @@ export interface BankTx {
 
 export interface ChatMessage { role: 'user' | 'assistant'; content: string }
 
+export interface HoloStatus {
+  configured: boolean
+  connected: boolean
+  holofolioUser: string | null
+  lastSyncAt: string | null
+  lastTotalValue: number | null
+  lastTotalInvested: number | null
+}
+
+export interface HoloItem { id?: string; name?: string; imageUrl?: string; marketValue?: number; quantity?: number }
+export interface HoloData {
+  connected: boolean
+  portfolio?: { totalValue: number; totalInvested: number }
+  history?: { date: string; value: number }[] | null
+  collection?: { currency: string; items: HoloItem[]; total: number } | null
+}
+
+export interface PriceAlert {
+  id: string
+  symbol: string
+  name: string | null
+  condition: 'above' | 'below'
+  target: number
+  currency: string
+  triggered?: boolean
+  createdAt: string
+}
+
 export interface Me {
   id: string
   email: string
