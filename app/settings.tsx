@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
+import * as FileSystem from 'expo-file-system/legacy'
+import * as Sharing from 'expo-sharing'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
@@ -68,6 +70,44 @@ export default function Settings() {
     } finally { setBusy(false) }
   }
 
+  // Compte
+  const [exporting, setExporting] = useState(false)
+  const [delPwd, setDelPwd] = useState('')
+  const [delErr, setDelErr] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const exportData = async () => {
+    setExporting(true)
+    try {
+      const data = await api.get<unknown>('/api/users/export')
+      const uri = FileSystem.documentDirectory + `vestix-export-${new Date().toISOString().slice(0, 10)}.json`
+      await FileSystem.writeAsStringAsync(uri, JSON.stringify(data, null, 2))
+      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri)
+      else Alert.alert('Export', `Données enregistrées : ${uri}`)
+    } catch (e) {
+      Alert.alert('Export', e instanceof ApiError ? e.message : 'Échec de l’export')
+    } finally { setExporting(false) }
+  }
+
+  const confirmDeleteAccount = () => {
+    Alert.alert('Supprimer le compte', 'Action IRRÉVERSIBLE : toutes tes données seront effacées. Continuer ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: doDeleteAccount },
+    ])
+  }
+
+  const doDeleteAccount = async () => {
+    setDelErr(null)
+    if (!delPwd) { setDelErr('Mot de passe requis pour confirmer'); return }
+    setDeleting(true)
+    try {
+      await api.post('/api/users/delete-account', { password: delPwd })
+      await signOut()
+    } catch (e) {
+      setDelErr(e instanceof ApiError ? e.message : 'Échec de la suppression')
+    } finally { setDeleting(false) }
+  }
+
   return (
     <AppShell>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -110,6 +150,16 @@ export default function Settings() {
               )}
             </FxCard>
 
+            <FxCard>
+              <FxCardHeader title="Mon compte" sub="DONNÉES RGPD" />
+              <FxButton label={exporting ? 'Export…' : 'Exporter mes données'} variant="ghost" onPress={exportData} />
+              <View style={styles.sep} />
+              <Text style={styles.danger}>Zone sensible</Text>
+              <Field label="Mot de passe (pour supprimer le compte)" value={delPwd} onChangeText={setDelPwd} secureTextEntry />
+              {delErr ? <Text style={styles.err}>{delErr}</Text> : null}
+              <FxButton label={deleting ? '...' : 'Supprimer mon compte'} variant="danger" onPress={confirmDeleteAccount} />
+            </FxCard>
+
             <FxButton label="Se déconnecter" variant="ghost" onPress={signOut} />
           </>
         )}
@@ -125,4 +175,6 @@ const styles = StyleSheet.create({
   muted: { fontFamily: font.body, fontSize: 13, color: color.inkSoft, marginBottom: 10 },
   msg: { fontFamily: font.bodyMed, fontSize: 13, color: color.acc, marginBottom: 10 },
   err: { fontFamily: font.bodyMed, fontSize: 13, color: color.down, marginBottom: 10 },
+  sep: { height: 1, backgroundColor: color.hair2, marginVertical: 14 },
+  danger: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: color.down, marginBottom: 10 },
 })
