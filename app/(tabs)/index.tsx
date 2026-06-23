@@ -43,11 +43,11 @@ export default function Dashboard() {
             <Text style={styles.eyebrow}>VESTIX</Text>
             <Text style={styles.h1}>Patrimoine</Text>
           </View>
-          <View style={styles.avatar}>
+          <Pressable style={styles.avatar} onPress={() => router.push('/settings' as Href)}>
             <Text style={styles.avatarTxt}>
               {(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}
             </Text>
-          </View>
+          </Pressable>
         </View>
 
         {loading ? (
