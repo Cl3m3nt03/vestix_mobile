@@ -21,7 +21,7 @@ const LABEL: Record<string, string> = {
 export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{ headerShown: false, animation: 'shift' }}
+      screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => {
         const items: NavItem[] = state.routes.map((r) => ({
           key: r.name,

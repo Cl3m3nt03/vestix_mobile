@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/hanken-grotesk'
 import { JetBrainsMono_400Regular, JetBrainsMono_600SemiBold } from '@expo-google-fonts/jetbrains-mono'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -33,7 +34,11 @@ function AuthGate() {
     else if (token && onLogin) router.replace('/(tabs)')
   }, [token, ready, segments])
 
-  return <Slot />
+  return (
+    <ErrorBoundary>
+      <Slot />
+    </ErrorBoundary>
+  )
 }
 
 export default function RootLayout() {
