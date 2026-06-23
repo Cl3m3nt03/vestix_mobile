@@ -70,6 +70,34 @@ export interface BudgetData {
   income: number | null
 }
 
+export interface Goal {
+  id: string
+  name: string
+  targetValue: number
+  currency: string
+  targetDate: string | null
+  notes: string | null
+  assetId: string | null
+  assetName: string | null
+  expectedRate: number
+}
+
+export interface PerfPoint { date: string; value: number }
+export interface Performance {
+  portfolio: PerfPoint[]
+  cac40: PerfPoint[]
+  sp500: PerfPoint[]
+  msciWorld: PerfPoint[]
+}
+
+export interface Fiscal {
+  year: number
+  plusValues: { total: number; cto: number; pea: number; exoneres: number
+    lines: { date: string; symbol: string; quantity: number; plusValue: number; accountType: string; exonere: boolean }[] }
+  dividends: { total: number; lines: { date: string; symbol: string | null; amount: number; currency: string }[] }
+  tax: { taxableBase: number; pfuAmount: number; pfuRate: number; peaExonereAmount: number; irAmount: number; socialAmount: number }
+}
+
 export interface Me {
   id: string
   email: string

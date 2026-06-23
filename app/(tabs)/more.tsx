@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard } from '@/components/ui/FxCard'
@@ -8,16 +9,18 @@ import { useMe } from '@/lib/queries'
 import { useAuth } from '@/lib/auth-context'
 import { color, font } from '@/theme/tokens'
 
-const LINKS: { icon: keyof typeof Feather.glyphMap; label: string }[] = [
+const LINKS: { icon: keyof typeof Feather.glyphMap; label: string; href?: string }[] = [
+  { icon: 'target', label: 'Objectifs', href: '/goals' },
+  { icon: 'bar-chart-2', label: 'Performance', href: '/performance' },
+  { icon: 'percent', label: 'Fiscalité', href: '/fiscal' },
   { icon: 'credit-card', label: 'Comptes bancaires' },
-  { icon: 'target', label: 'Objectifs' },
-  { icon: 'bar-chart-2', label: 'Performance' },
   { icon: 'message-circle', label: 'Assistant IA' },
   { icon: 'settings', label: 'Réglages' },
 ]
 
 export default function More() {
   const me = useMe()
+  const router = useRouter()
   const { signOut } = useAuth()
 
   return (
@@ -39,7 +42,11 @@ export default function More() {
 
         <FxCard style={{ padding: 8 }}>
           {LINKS.map((l, i) => (
-            <Pressable key={l.label} style={[styles.link, i > 0 && styles.border]}>
+            <Pressable
+              key={l.label}
+              onPress={() => l.href && router.push(l.href as Href)}
+              style={[styles.link, i > 0 && styles.border, !l.href && { opacity: 0.45 }]}
+            >
               <Feather name={l.icon} size={19} color={color.inkSoft} />
               <Text style={styles.linkTxt}>{l.label}</Text>
               <Feather name="chevron-right" size={18} color={color.inkFaint} />
