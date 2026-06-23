@@ -39,6 +39,37 @@ export interface Asset {
   readOnly?: boolean
 }
 
+export type TxType = 'BUY' | 'SELL' | 'DEPOSIT' | 'WITHDRAWAL' | 'DIVIDEND'
+
+export interface Transaction {
+  id: string
+  type: TxType
+  symbol: string | null
+  quantity: number | null
+  price: number
+  fees: number
+  currency: string
+  date: string
+  notes: string | null
+  holding?: { symbol: string; name: string; assetId: string } | null
+}
+
+export type BudgetCategory = 'needs' | 'wants' | 'savings' | 'investment'
+
+export interface BudgetItem {
+  id: string
+  label: string
+  amount: number
+  category: BudgetCategory
+  dayOfMonth: number | null
+  recurring: boolean
+}
+
+export interface BudgetData {
+  items: BudgetItem[]
+  income: number | null
+}
+
 export interface Me {
   id: string
   email: string

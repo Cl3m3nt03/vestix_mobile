@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -8,38 +7,12 @@ import { FxKpi } from '@/components/ui/FxKpi'
 import { FxBadge } from '@/components/ui/FxBadge'
 import { FxPill } from '@/components/ui/FxPill'
 import { Donut, Slice } from '@/components/ui/Donut'
-import { BottomNav, NavItem } from '@/components/ui/BottomNav'
 import { useStats, useAssets, useMe } from '@/lib/queries'
-import { useAuth } from '@/lib/auth-context'
-import type { AssetType, AssetBreakdown } from '@/lib/types'
+import type { AssetType } from '@/lib/types'
+import { eur, CAT } from '@/lib/format'
 import { color, font, accentGradient, shadow } from '@/theme/tokens'
 
-const NAV: NavItem[] = [
-  { key: 'home',   label: 'Accueil',    icon: (a) => <Feather name="home" size={21} color={a ? color.acc : color.inkSoft} /> },
-  { key: 'folio',  label: 'Portefeuille', icon: (a) => <Feather name="pie-chart" size={21} color={a ? color.acc : color.inkSoft} /> },
-  { key: 'tx',     label: 'Transactions', icon: (a) => <Feather name="repeat" size={21} color={a ? color.acc : color.inkSoft} /> },
-  { key: 'budget', label: 'Budget',     icon: (a) => <Feather name="trending-up" size={21} color={a ? color.acc : color.inkSoft} /> },
-  { key: 'more',   label: 'Plus',       icon: (a) => <Feather name="grid" size={21} color={a ? color.acc : color.inkSoft} /> },
-]
-
-const eur = (n: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
-
-const CAT: Record<AssetType, { label: string; color: string }> = {
-  STOCK:        { label: 'Actions',    color: color.acc },
-  PEA:          { label: 'PEA',        color: color.acc2 },
-  CTO:          { label: 'CTO',        color: color.accBr },
-  CRYPTO:       { label: 'Crypto',     color: color.pop },
-  SAVINGS:      { label: 'Épargne',    color: color.d2 },
-  BANK_ACCOUNT: { label: 'Banque',     color: color.info },
-  REAL_ESTATE:  { label: 'Immo',       color: color.violet },
-  COLLECTION:   { label: 'Collection', color: color.d4 },
-  OTHER:        { label: 'Autre',      color: color.inkFaint },
-}
-
 export default function Dashboard() {
-  const [tab, setTab] = useState('home')
-  const { signOut } = useAuth()
   const me = useMe()
   const stats = useStats()
   const assets = useAssets()
@@ -55,11 +28,6 @@ export default function Dashboard() {
         .sort((a, b) => b[1] - a[1])
         .map(([k, v]) => ({ label: CAT[k].label, value: v, color: CAT[k].color }))
     : []
-
-  const onMore = (k: string) => {
-    setTab(k)
-    if (k === 'more') signOut() // provisoire : "Plus" = déconnexion tant que la feuille n'existe pas
-  }
 
   return (
     <AppShell>
@@ -89,9 +57,6 @@ export default function Dashboard() {
           <FxCard>
             <Text style={styles.errTitle}>Impossible de charger les données</Text>
             <Text style={styles.muted}>{String((error as Error).message)}</Text>
-            <Text style={[styles.muted, { marginTop: 8 }]}>
-              Vérifie EXPO_PUBLIC_API_URL puis tire pour rafraîchir.
-            </Text>
           </FxCard>
         ) : (
           <>
@@ -127,15 +92,13 @@ export default function Dashboard() {
               {assets.data!.length === 0 ? (
                 <Text style={styles.muted}>Ajoute un actif depuis le web pour le voir ici.</Text>
               ) : (
-                assets.data!.map((a, i) => {
+                assets.data!.slice(0, 5).map((a, i) => {
                   const cat = CAT[a.type] ?? CAT.OTHER
                   const pnl = a.holdings?.[0]?.pnlPercentEur
                   return (
                     <View key={a.id} style={[styles.assetRow, i > 0 && styles.assetBorder]}>
                       <View style={[styles.tickLogo, { backgroundColor: cat.color + '22' }]}>
-                        <Text style={[styles.tickTxt, { color: cat.color }]}>
-                          {a.name.slice(0, 3).toUpperCase()}
-                        </Text>
+                        <Text style={[styles.tickTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.assetName} numberOfLines={1}>{a.name}</Text>
@@ -163,8 +126,6 @@ export default function Dashboard() {
           <Feather name="message-circle" size={24} color={color.white} />
         </LinearGradient>
       </Pressable>
-
-      <BottomNav items={NAV} active={tab} onSelect={onMore} />
     </AppShell>
   )
 }
@@ -190,6 +151,6 @@ const styles = StyleSheet.create({
   assetName: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   assetCat: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.5, textTransform: 'uppercase', color: color.inkFaint, marginTop: 2 },
   assetVal: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink, fontVariant: ['tabular-nums'] },
-  fab: { position: 'absolute', right: 16, bottom: 92, width: 58, height: 58, borderRadius: 18, ...shadow.lg, shadowColor: color.acc },
+  fab: { position: 'absolute', right: 16, bottom: 16, width: 58, height: 58, borderRadius: 18, ...shadow.lg, shadowColor: color.acc },
   fabInner: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 })

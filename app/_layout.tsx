@@ -30,7 +30,7 @@ function AuthGate() {
     if (!ready) return
     const onLogin = segments[0] === 'login'
     if (!token && !onLogin) router.replace('/login')
-    else if (token && onLogin) router.replace('/')
+    else if (token && onLogin) router.replace('/(tabs)/index')
   }, [token, ready, segments])
 
   return <Slot />

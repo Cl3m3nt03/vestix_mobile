@@ -1,0 +1,67 @@
+import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
+import { Feather } from '@expo/vector-icons'
+import { AppShell } from '@/components/ui/AppShell'
+import { ScreenHeader } from '@/components/ui/ScreenHeader'
+import { FxCard } from '@/components/ui/FxCard'
+import { FxButton } from '@/components/ui/FxButton'
+import { useMe } from '@/lib/queries'
+import { useAuth } from '@/lib/auth-context'
+import { color, font } from '@/theme/tokens'
+
+const LINKS: { icon: keyof typeof Feather.glyphMap; label: string }[] = [
+  { icon: 'credit-card', label: 'Comptes bancaires' },
+  { icon: 'target', label: 'Objectifs' },
+  { icon: 'bar-chart-2', label: 'Performance' },
+  { icon: 'message-circle', label: 'Assistant IA' },
+  { icon: 'settings', label: 'Réglages' },
+]
+
+export default function More() {
+  const me = useMe()
+  const { signOut } = useAuth()
+
+  return (
+    <AppShell>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScreenHeader eyebrow="VESTIX" title="Plus" />
+
+        <FxCard>
+          <View style={styles.profile}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarTxt}>{(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{me.data?.name ?? 'Mon compte'}</Text>
+              <Text style={styles.email} numberOfLines={1}>{me.data?.email ?? ''}</Text>
+            </View>
+          </View>
+        </FxCard>
+
+        <FxCard style={{ padding: 8 }}>
+          {LINKS.map((l, i) => (
+            <Pressable key={l.label} style={[styles.link, i > 0 && styles.border]}>
+              <Feather name={l.icon} size={19} color={color.inkSoft} />
+              <Text style={styles.linkTxt}>{l.label}</Text>
+              <Feather name="chevron-right" size={18} color={color.inkFaint} />
+            </Pressable>
+          ))}
+        </FxCard>
+
+        <FxButton label="Se déconnecter" variant="danger" onPress={signOut} />
+        <View style={{ height: 16 }} />
+      </ScrollView>
+    </AppShell>
+  )
+}
+
+const styles = StyleSheet.create({
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  profile: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: color.acc3 },
+  avatarTxt: { fontFamily: font.display, fontSize: 16, color: color.white },
+  name: { fontFamily: font.display, fontSize: 17, color: color.ink },
+  email: { fontFamily: font.body, fontSize: 13, color: color.inkSoft, marginTop: 2 },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 14, paddingHorizontal: 10 },
+  border: { borderTopWidth: 1, borderTopColor: color.hair2 },
+  linkTxt: { flex: 1, fontFamily: font.bodyMed, fontSize: 14.5, color: color.ink },
+})
