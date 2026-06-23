@@ -5,7 +5,7 @@ import { getToken, saveToken, clearToken } from './auth'
  * Toutes les routes acceptent `Authorization: Bearer <jwt>` via le helper
  * unifié `getUser(req)` côté serveur. Aucune modif backend nécessaire.
  */
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://finexa.vercel.app'
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://finexa-dev.vercel.app'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
