@@ -3,7 +3,7 @@ import { api } from './api'
 import type {
   PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult,
   Institution, BankConnection, BankTx,
-  HoloStatus, HoloData, PriceAlert,
+  HoloStatus, HoloData, PriceAlert, RebalanceResult,
 } from './types'
 
 export function useMe() {
@@ -216,5 +216,12 @@ export function useDeleteAlert() {
   return useMutation({
     mutationFn: (id: string) => api.del(`/api/alerts/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts'] }),
+  })
+}
+
+// ── Rééquilibrage ─────────────────────────────────────────────────────────────
+export function useRebalance() {
+  return useMutation({
+    mutationFn: (targets: Record<string, number>) => api.post<RebalanceResult>('/api/rebalance', { targets }),
   })
 }

@@ -153,6 +153,14 @@ export interface PriceAlert {
   createdAt: string
 }
 
+export interface RebalanceSuggestion {
+  type: string; currentValue: number; currentPct: number
+  targetPct: number; targetValue: number; delta: number; deltaPct: number
+}
+export interface RebalanceResult {
+  totalValue: number; sumTargets: number; suggestions: RebalanceSuggestion[]
+}
+
 export interface Me {
   id: string
   email: string
