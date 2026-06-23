@@ -75,7 +75,7 @@ export function Donut({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 20 },
-  center: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+  center: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   cVal: { fontFamily: font.display, fontSize: 20, color: color.ink, lineHeight: 22 },
   cLbl: { fontFamily: font.mono, fontSize: 9, letterSpacing: 0.7, textTransform: 'uppercase', color: color.inkFaint },
   legend: { flex: 1, gap: 10 },

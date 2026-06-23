@@ -4,7 +4,8 @@ App mobile native du tracker de patrimoine **Finexa** (web). Marque mobile = **V
 Même backend, même DA « Émeraude » que le web.
 
 ## Stack
-- Expo SDK 56, React Native 0.85, React 19, TypeScript strict.
+- Expo SDK 54, React Native 0.81, React 19.1, TypeScript strict.
+  (SDK 54 et pas 56 : Expo Go du store ne supporte pas encore 56.)
 - expo-router (file-based, dossier `app/`), TanStack Query, react-native-svg,
   expo-linear-gradient, expo-secure-store, reanimated 4 (+ react-native-worklets).
 - Polices : Outfit (display) · Hanken Grotesk (UI) · JetBrains Mono (mono) via
@@ -29,7 +30,7 @@ Même backend, même DA « Émeraude » que le web.
   Pas d'animation en boucle derrière une zone floutée. Blobs de fond = statiques.
 - **Lisibilité** : texte blanc sur fond accent émeraude, jamais de texte sombre dessus.
 - **npm** : `legacy-peer-deps=true` (`.npmrc`) — React 19 vs peers d'expo-router. Utiliser
-  `npx expo install <pkg>` pour les modules natifs (versions alignées SDK 56).
+  `npx expo install <pkg>` pour les modules natifs (versions alignées SDK 54).
 - reanimated 4 → plugin `react-native-worklets/plugin` en dernier dans `babel.config.js`.
 
 ## Commandes
