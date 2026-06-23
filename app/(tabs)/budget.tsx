@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
+import { AddButton } from '@/components/ui/AddButton'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxKpi } from '@/components/ui/FxKpi'
+import { AddBudgetItem } from '@/components/forms/AddBudgetItem'
 import { useBudget } from '@/lib/queries'
 import type { BudgetCategory } from '@/lib/types'
 import { eur } from '@/lib/format'
@@ -21,15 +24,17 @@ export default function Budget() {
   const income = q.data?.income ?? 0
   const spent = items.reduce((s, it) => s + it.amount, 0)
   const left = income - spent
+  const [add, setAdd] = useState(false)
 
   return (
     <AppShell>
+      <AddBudgetItem visible={add} onClose={() => setAdd(false)} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
       >
-        <ScreenHeader eyebrow="VESTIX" title="Budget" />
+        <ScreenHeader eyebrow="VESTIX" title="Budget" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {q.isLoading ? (
           <View style={styles.center}><ActivityIndicator color={color.acc} /></View>

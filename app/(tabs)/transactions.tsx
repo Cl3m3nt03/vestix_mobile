@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
+import { AddButton } from '@/components/ui/AddButton'
 import { FxCard } from '@/components/ui/FxCard'
+import { AddTransaction } from '@/components/forms/AddTransaction'
 import { useTransactions } from '@/lib/queries'
 import type { TxType } from '@/lib/types'
 import { eur, dateFr } from '@/lib/format'
@@ -18,15 +21,17 @@ const TX: Record<TxType, { label: string; icon: keyof typeof Feather.glyphMap; c
 
 export default function Transactions() {
   const q = useTransactions()
+  const [add, setAdd] = useState(false)
 
   return (
     <AppShell>
+      <AddTransaction visible={add} onClose={() => setAdd(false)} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
       >
-        <ScreenHeader eyebrow="VESTIX" title="Transactions" />
+        <ScreenHeader eyebrow="VESTIX" title="Transactions" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {q.isLoading ? (
           <View style={styles.center}><ActivityIndicator color={color.acc} /></View>

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type { PortfolioStats, Asset, Me, Transaction, BudgetData } from './types'
 
@@ -20,4 +20,36 @@ export function useTransactions() {
 
 export function useBudget() {
   return useQuery({ queryKey: ['budget'], queryFn: () => api.get<BudgetData>('/api/budget/items') })
+}
+
+// ── Mutations ───────────────────────────────────────────────────────────────
+export function useAddTransaction() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => api.post('/api/transactions', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+      qc.invalidateQueries({ queryKey: ['assets'] })
+    },
+  })
+}
+
+export function useAddAsset() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => api.post('/api/assets', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['assets'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+    },
+  })
+}
+
+export function useAddBudgetItem() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => api.post('/api/budget/items', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['budget'] }),
+  })
 }

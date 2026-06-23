@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
+import { AddButton } from '@/components/ui/AddButton'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxPill } from '@/components/ui/FxPill'
 import { Donut, Slice } from '@/components/ui/Donut'
+import { AddAsset } from '@/components/forms/AddAsset'
 import { useStats, useAssets } from '@/lib/queries'
 import type { AssetType } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
@@ -17,6 +20,8 @@ export default function Folio() {
   const refreshing = stats.isRefetching || assets.isRefetching
   const refetch = () => { stats.refetch(); assets.refetch() }
 
+  const [add, setAdd] = useState(false)
+
   const slices: Slice[] = stats.data
     ? (Object.entries(stats.data.breakdown) as [AssetType, number][])
         .filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
@@ -25,12 +30,13 @@ export default function Folio() {
 
   return (
     <AppShell>
+      <AddAsset visible={add} onClose={() => setAdd(false)} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={color.acc} />}
       >
-        <ScreenHeader eyebrow="VESTIX" title="Portefeuille" />
+        <ScreenHeader eyebrow="VESTIX" title="Portefeuille" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {loading ? (
           <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
