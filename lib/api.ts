@@ -39,6 +39,34 @@ export const api = {
   del:   <T>(p: string) => request<T>(p, { method: 'DELETE' }),
 }
 
+// ── Assistant IA (réponse en texte brut, pas JSON) ──────────────────────────
+import type { ChatMessage } from './types'
+
+export async function sendChat(messages: ChatMessage[]): Promise<string> {
+  const token = await getToken()
+  const res = await fetch(`${BASE}/api/assistant`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ messages }),
+  })
+  const text = await res.text()
+  if (!res.ok) {
+    // 403 consentement requis → JSON ; sinon message d'erreur
+    try {
+      const j = JSON.parse(text)
+      if (j.requiresConsent) throw new ApiError(403, 'CONSENT_REQUIRED')
+      throw new ApiError(res.status, j.error ?? j.message ?? `HTTP ${res.status}`)
+    } catch (e) {
+      if (e instanceof ApiError) throw e
+      throw new ApiError(res.status, `HTTP ${res.status}`)
+    }
+  }
+  return text
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────
 type LoginResult =
   | { requires2FA: true }

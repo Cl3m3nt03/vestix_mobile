@@ -15,8 +15,8 @@ const LINKS: { icon: keyof typeof Feather.glyphMap; label: string; href?: string
   { icon: 'bar-chart-2', label: 'Performance', href: '/performance' },
   { icon: 'percent', label: 'Fiscalité', href: '/fiscal' },
   { icon: 'settings', label: 'Réglages', href: '/settings' },
-  { icon: 'credit-card', label: 'Comptes bancaires' },
-  { icon: 'message-circle', label: 'Assistant IA' },
+  { icon: 'credit-card', label: 'Comptes bancaires', href: '/bank' },
+  { icon: 'message-circle', label: 'Assistant IA', href: '/assistant' },
 ]
 
 export default function More() {

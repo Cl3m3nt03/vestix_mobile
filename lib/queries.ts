@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult } from './types'
+import type {
+  PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult,
+  Institution, BankConnection, BankTx,
+} from './types'
 
 export function useMe() {
   return useQuery({ queryKey: ['me'], queryFn: () => api.get<Me>('/api/users/me') })
@@ -96,5 +99,44 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: (body: { name?: string; email?: string }) => api.patch('/api/users/me', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  })
+}
+
+// ── Banque ──────────────────────────────────────────────────────────────────
+export function useBankConnections() {
+  return useQuery({ queryKey: ['bank-connections'], queryFn: () => api.get<BankConnection[]>('/api/bank/sync') })
+}
+
+export function useBankTransactions() {
+  return useQuery({
+    queryKey: ['bank-transactions'],
+    queryFn: () => api.get<{ transactions: BankTx[]; total: number; totals: { in: number; out: number } }>('/api/bank/transactions?limit=100'),
+  })
+}
+
+export function useInstitutions(q: string) {
+  return useQuery({
+    queryKey: ['institutions', q],
+    queryFn: () => api.get<Institution[]>(`/api/bank/institutions?country=FR&q=${encodeURIComponent(q)}`),
+  })
+}
+
+export function useConnectBank() {
+  return useMutation({
+    mutationFn: (body: { institutionId: string; bankName: string }) =>
+      api.post<{ link: string; connectionId: string }>('/api/bank/connect', { ...body, country: 'FR' }),
+  })
+}
+
+export function useSyncBank() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (connectionId: string) => api.post('/api/bank/sync', { connectionId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bank-connections'] })
+      qc.invalidateQueries({ queryKey: ['bank-transactions'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+      qc.invalidateQueries({ queryKey: ['assets'] })
+    },
   })
 }

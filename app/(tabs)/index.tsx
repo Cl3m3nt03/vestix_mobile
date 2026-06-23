@@ -1,5 +1,6 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { useRouter, type Href } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { AppShell } from '@/components/ui/AppShell'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
@@ -13,6 +14,7 @@ import { eur, CAT } from '@/lib/format'
 import { color, font, accentGradient, shadow } from '@/theme/tokens'
 
 export default function Dashboard() {
+  const router = useRouter()
   const me = useMe()
   const stats = useStats()
   const assets = useAssets()
@@ -121,7 +123,7 @@ export default function Dashboard() {
         <View style={{ height: 16 }} />
       </ScrollView>
 
-      <Pressable style={styles.fab}>
+      <Pressable style={styles.fab} onPress={() => router.push('/assistant' as Href)}>
         <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fabInner}>
           <Feather name="message-circle" size={24} color={color.white} />
         </LinearGradient>

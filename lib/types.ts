@@ -104,6 +104,27 @@ export interface SearchResult {
   goals: { id: string; name: string; targetValue: number; currency: string }[]
 }
 
+export interface Institution { id: string; name: string; country: string; bic: string; logo: string }
+
+export interface BankAccount {
+  id: string; nordigenId: string; iban: string | null; name: string | null
+  currency: string; balance: number; balanceType: string | null; updatedAt: string
+}
+
+export interface BankConnection {
+  id: string; institutionId: string; institutionName: string
+  status: string; validUntil: string | null; lastSyncAt: string | null; createdAt: string
+  accounts: BankAccount[]
+}
+
+export interface BankTx {
+  id: string; accountId: string; accountName: string | null; bookingDate: string
+  amount: number; direction: 'CRDT' | 'DBIT'; currency: string
+  merchant: string | null; reference: string | null; category: string | null
+}
+
+export interface ChatMessage { role: 'user' | 'assistant'; content: string }
+
 export interface Me {
   id: string
   email: string
