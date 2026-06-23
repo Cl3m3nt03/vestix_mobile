@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { AppShell } from '@/components/ui/AppShell'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxKpi } from '@/components/ui/FxKpi'
-import { FxChip } from '@/components/ui/FxChip'
 import { FxBadge } from '@/components/ui/FxBadge'
 import { FxPill } from '@/components/ui/FxPill'
-import { Donut } from '@/components/ui/Donut'
+import { Donut, Slice } from '@/components/ui/Donut'
 import { BottomNav, NavItem } from '@/components/ui/BottomNav'
+import { useStats, useAssets, useMe } from '@/lib/queries'
+import { useAuth } from '@/lib/auth-context'
+import type { AssetType, AssetBreakdown } from '@/lib/types'
 import { color, font, accentGradient, shadow } from '@/theme/tokens'
-import { LinearGradient } from 'expo-linear-gradient'
 
 const NAV: NavItem[] = [
   { key: 'home',   label: 'Accueil',    icon: (a) => <Feather name="home" size={21} color={a ? color.acc : color.inkSoft} /> },
@@ -20,111 +22,149 @@ const NAV: NavItem[] = [
   { key: 'more',   label: 'Plus',       icon: (a) => <Feather name="grid" size={21} color={a ? color.acc : color.inkSoft} /> },
 ]
 
-const ASSETS = [
-  { tick: 'CW8',  name: 'Amundi MSCI World', cat: 'PEA',    val: '12 480 €', dir: 'up' as const, chg: '4,2 %' },
-  { tick: 'BTC',  name: 'Bitcoin',           cat: 'Crypto', val: '6 920 €',  dir: 'up' as const, chg: '11,8 %' },
-  { tick: 'AAPL', name: 'Apple',             cat: 'CTO',    val: '3 150 €',  dir: 'down' as const, chg: '1,4 %' },
-  { tick: 'LIV',  name: 'Livret A',          cat: 'Épargne', val: '8 200 €', dir: 'up' as const, chg: '0,2 %' },
-]
+const eur = (n: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
+
+const CAT: Record<AssetType, { label: string; color: string }> = {
+  STOCK:        { label: 'Actions',    color: color.acc },
+  PEA:          { label: 'PEA',        color: color.acc2 },
+  CTO:          { label: 'CTO',        color: color.accBr },
+  CRYPTO:       { label: 'Crypto',     color: color.pop },
+  SAVINGS:      { label: 'Épargne',    color: color.d2 },
+  BANK_ACCOUNT: { label: 'Banque',     color: color.info },
+  REAL_ESTATE:  { label: 'Immo',       color: color.violet },
+  COLLECTION:   { label: 'Collection', color: color.d4 },
+  OTHER:        { label: 'Autre',      color: color.inkFaint },
+}
 
 export default function Dashboard() {
   const [tab, setTab] = useState('home')
-  const [period, setPeriod] = useState('1M')
+  const { signOut } = useAuth()
+  const me = useMe()
+  const stats = useStats()
+  const assets = useAssets()
+
+  const loading = stats.isLoading || assets.isLoading
+  const error = stats.error || assets.error
+  const refreshing = stats.isRefetching || assets.isRefetching
+  const refetch = () => { stats.refetch(); assets.refetch(); me.refetch() }
+
+  const slices: Slice[] = stats.data
+    ? (Object.entries(stats.data.breakdown) as [AssetType, number][])
+        .filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => ({ label: CAT[k].label, value: v, color: CAT[k].color }))
+    : []
+
+  const onMore = (k: string) => {
+    setTab(k)
+    if (k === 'more') signOut() // provisoire : "Plus" = déconnexion tant que la feuille n'existe pas
+  }
 
   return (
     <AppShell>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Topbar */}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={color.acc} />}
+      >
         <View style={styles.topbar}>
           <View>
             <Text style={styles.eyebrow}>VESTIX</Text>
             <Text style={styles.h1}>Patrimoine</Text>
           </View>
           <View style={styles.avatar}>
-            <Text style={styles.avatarTxt}>CL</Text>
+            <Text style={styles.avatarTxt}>
+              {(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}
+            </Text>
           </View>
         </View>
 
-        {/* KPIs */}
-        <View style={styles.kpis}>
-          <FxKpi
-            label="Total"
-            value="30 750 €"
-            icon={<Feather name="layers" size={17} color={color.acc} />}
-            trend={{ dir: 'up', text: '+5,7 % ce mois' }}
-          />
-          <FxKpi
-            label="Plus-value"
-            value="+4 210 €"
-            icon={<Feather name="trending-up" size={17} color={color.acc} />}
-            trend={{ dir: 'up', text: '+15,8 %' }}
-          />
-        </View>
-
-        {/* Évolution */}
-        <FxCard>
-          <FxCardHeader
-            title="Évolution"
-            sub="VALORISATION"
-            right={<FxBadge label="Live" tone="live" />}
-          />
-          <View style={styles.periods}>
-            {['1S', '1M', '1A', 'Max'].map((p) => (
-              <FxChip key={p} label={p} active={p === period} onPress={() => setPeriod(p)} />
-            ))}
+        {loading ? (
+          <View style={styles.centerBox}>
+            <ActivityIndicator color={color.acc} />
+            <Text style={styles.muted}>Connexion au serveur…</Text>
           </View>
-          {/* Placeholder graphe (victory-native à brancher) */}
-          <View style={styles.chartStub}>
-            <Feather name="activity" size={22} color={color.accBr} />
-            <Text style={styles.chartStubTxt}>Graphe d'évolution ({period})</Text>
-          </View>
-        </FxCard>
-
-        {/* Répartition */}
-        <FxCard>
-          <FxCardHeader title="Répartition" sub="PAR CLASSE D'ACTIF" />
-          <Donut
-            centerValue="30,7 k€"
-            centerLabel="Total"
-            slices={[
-              { label: 'Actions / ETF', value: 15630, color: color.acc },
-              { label: 'Crypto', value: 6920, color: color.pop },
-              { label: 'Épargne', value: 8200, color: color.d2 },
-            ]}
-          />
-        </FxCard>
-
-        {/* Actifs */}
-        <FxCard>
-          <FxCardHeader title="Mes actifs" sub="4 LIGNES" />
-          {ASSETS.map((a, i) => (
-            <View key={a.tick} style={[styles.assetRow, i > 0 && styles.assetBorder]}>
-              <View style={styles.tickLogo}>
-                <Text style={styles.tickTxt}>{a.tick.slice(0, 3)}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.assetName}>{a.name}</Text>
-                <Text style={styles.assetCat}>{a.cat}</Text>
-              </View>
-              <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                <Text style={styles.assetVal}>{a.val}</Text>
-                <FxPill dir={a.dir} label={a.chg} />
-              </View>
+        ) : error ? (
+          <FxCard>
+            <Text style={styles.errTitle}>Impossible de charger les données</Text>
+            <Text style={styles.muted}>{String((error as Error).message)}</Text>
+            <Text style={[styles.muted, { marginTop: 8 }]}>
+              Vérifie EXPO_PUBLIC_API_URL puis tire pour rafraîchir.
+            </Text>
+          </FxCard>
+        ) : (
+          <>
+            <View style={styles.kpis}>
+              <FxKpi
+                label="Total"
+                value={eur(stats.data!.totalValue)}
+                icon={<Feather name="layers" size={17} color={color.acc} />}
+                trend={{
+                  dir: stats.data!.totalPnl >= 0 ? 'up' : 'down',
+                  text: `${stats.data!.totalPnlPercent >= 0 ? '+' : ''}${stats.data!.totalPnlPercent.toFixed(1)} %`,
+                }}
+              />
+              <FxKpi
+                label="Plus-value"
+                value={`${stats.data!.totalPnl >= 0 ? '+' : ''}${eur(stats.data!.totalPnl)}`}
+                icon={<Feather name="trending-up" size={17} color={color.acc} />}
+                sub={`Investi ${eur(stats.data!.totalInvested)}`}
+              />
             </View>
-          ))}
-        </FxCard>
+
+            <FxCard>
+              <FxCardHeader title="Répartition" sub="PAR CLASSE D'ACTIF" right={<FxBadge label="Live" tone="live" />} />
+              {slices.length ? (
+                <Donut centerValue={eur(stats.data!.totalValue)} centerLabel="Total" slices={slices} />
+              ) : (
+                <Text style={styles.muted}>Aucun actif pour le moment.</Text>
+              )}
+            </FxCard>
+
+            <FxCard>
+              <FxCardHeader title="Mes actifs" sub={`${assets.data!.length} LIGNE${assets.data!.length > 1 ? 'S' : ''}`} />
+              {assets.data!.length === 0 ? (
+                <Text style={styles.muted}>Ajoute un actif depuis le web pour le voir ici.</Text>
+              ) : (
+                assets.data!.map((a, i) => {
+                  const cat = CAT[a.type] ?? CAT.OTHER
+                  const pnl = a.holdings?.[0]?.pnlPercentEur
+                  return (
+                    <View key={a.id} style={[styles.assetRow, i > 0 && styles.assetBorder]}>
+                      <View style={[styles.tickLogo, { backgroundColor: cat.color + '22' }]}>
+                        <Text style={[styles.tickTxt, { color: cat.color }]}>
+                          {a.name.slice(0, 3).toUpperCase()}
+                        </Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.assetName} numberOfLines={1}>{a.name}</Text>
+                        <Text style={styles.assetCat}>{cat.label}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                        <Text style={styles.assetVal}>{eur(a.value)}</Text>
+                        {typeof pnl === 'number' ? (
+                          <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} />
+                        ) : null}
+                      </View>
+                    </View>
+                  )
+                })
+              )}
+            </FxCard>
+          </>
+        )}
 
         <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* FAB assistant */}
       <Pressable style={styles.fab}>
         <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fabInner}>
           <Feather name="message-circle" size={24} color={color.white} />
         </LinearGradient>
       </Pressable>
 
-      <BottomNav items={NAV} active={tab} onSelect={setTab} />
+      <BottomNav items={NAV} active={tab} onSelect={onMore} />
     </AppShell>
   )
 }
@@ -140,25 +180,16 @@ const styles = StyleSheet.create({
   },
   avatarTxt: { fontFamily: font.display, fontSize: 13, color: color.white },
   kpis: { flexDirection: 'row', gap: 12 },
-  periods: { flexDirection: 'row', gap: 6, marginBottom: 16 },
-  chartStub: {
-    height: 130, borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: color.accTint,
-  },
-  chartStubTxt: { fontFamily: font.bodyMed, fontSize: 13, color: color.inkSoft },
+  centerBox: { alignItems: 'center', gap: 10, paddingVertical: 60 },
+  muted: { fontFamily: font.body, fontSize: 13.5, color: color.inkSoft },
+  errTitle: { fontFamily: font.display, fontSize: 16, color: color.down, marginBottom: 6 },
   assetRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13 },
   assetBorder: { borderTopWidth: 1, borderTopColor: color.hair2 },
-  tickLogo: {
-    width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: color.accTint,
-  },
-  tickTxt: { fontFamily: font.display, fontSize: 12, color: color.acc },
+  tickLogo: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  tickTxt: { fontFamily: font.display, fontSize: 12 },
   assetName: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   assetCat: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.5, textTransform: 'uppercase', color: color.inkFaint, marginTop: 2 },
   assetVal: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink, fontVariant: ['tabular-nums'] },
-  fab: {
-    position: 'absolute', right: 16, bottom: 92, width: 58, height: 58, borderRadius: 18,
-    ...shadow.lg, shadowColor: color.acc,
-  },
+  fab: { position: 'absolute', right: 16, bottom: 92, width: 58, height: 58, borderRadius: 18, ...shadow.lg, shadowColor: color.acc },
   fabInner: { flex: 1, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 })

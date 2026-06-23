@@ -1,6 +1,5 @@
-import { useCallback } from 'react'
-import { View } from 'react-native'
-import { Slot } from 'expo-router'
+import { useEffect } from 'react'
+import { Slot, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -13,12 +12,29 @@ import {
   HankenGrotesk_600SemiBold,
 } from '@expo-google-fonts/hanken-grotesk'
 import { JetBrainsMono_400Regular, JetBrainsMono_600SemiBold } from '@expo-google-fonts/jetbrains-mono'
+import { AuthProvider, useAuth } from '@/lib/auth-context'
 
 SplashScreen.preventAutoHideAsync()
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
 })
+
+/** Redirige selon la présence du JWT : pas de token → /login, token → dashboard. */
+function AuthGate() {
+  const { token, ready } = useAuth()
+  const segments = useSegments()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!ready) return
+    const onLogin = segments[0] === 'login'
+    if (!token && !onLogin) router.replace('/login')
+    else if (token && onLogin) router.replace('/')
+  }, [token, ready, segments])
+
+  return <Slot />
+}
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -31,18 +47,20 @@ export default function RootLayout() {
     JetBrainsMono_600SemiBold,
   })
 
-  const onReady = useCallback(() => {
+  useEffect(() => {
     if (loaded) SplashScreen.hideAsync()
   }, [loaded])
 
   if (!loaded) return null
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onReady}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StatusBar style="dark" />
-          <Slot />
+          <AuthProvider>
+            <StatusBar style="dark" />
+            <AuthGate />
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
