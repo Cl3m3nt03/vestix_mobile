@@ -10,12 +10,13 @@ import { useAuth } from '@/lib/auth-context'
 import { color, font } from '@/theme/tokens'
 
 const LINKS: { icon: keyof typeof Feather.glyphMap; label: string; href?: string }[] = [
+  { icon: 'search', label: 'Recherche', href: '/explorer' },
   { icon: 'target', label: 'Objectifs', href: '/goals' },
   { icon: 'bar-chart-2', label: 'Performance', href: '/performance' },
   { icon: 'percent', label: 'Fiscalité', href: '/fiscal' },
+  { icon: 'settings', label: 'Réglages', href: '/settings' },
   { icon: 'credit-card', label: 'Comptes bancaires' },
   { icon: 'message-circle', label: 'Assistant IA' },
-  { icon: 'settings', label: 'Réglages' },
 ]
 
 export default function More() {

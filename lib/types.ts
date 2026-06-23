@@ -98,6 +98,12 @@ export interface Fiscal {
   tax: { taxableBase: number; pfuAmount: number; pfuRate: number; peaExonereAmount: number; irAmount: number; socialAmount: number }
 }
 
+export interface SearchResult {
+  assets: { id: string; name: string; type: AssetType; value: number; currency: string }[]
+  transactions: { id: string; type: TxType; symbol: string | null; price: number; currency: string; date: string; notes: string | null }[]
+  goals: { id: string; name: string; targetValue: number; currency: string }[]
+}
+
 export interface Me {
   id: string
   email: string

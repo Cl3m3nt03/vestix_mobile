@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal } from './types'
+import type { PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult } from './types'
 
 export function useMe() {
   return useQuery({ queryKey: ['me'], queryFn: () => api.get<Me>('/api/users/me') })
@@ -33,6 +33,22 @@ export function usePerformance(months = 24) {
 export function useFiscal(year?: number) {
   const y = year ?? new Date().getFullYear()
   return useQuery({ queryKey: ['fiscal', y], queryFn: () => api.get<Fiscal>(`/api/fiscal?year=${y}`) })
+}
+
+export function useSearch(q: string) {
+  return useQuery({
+    queryKey: ['search', q],
+    queryFn: () => api.get<SearchResult>(`/api/global-search?q=${encodeURIComponent(q)}`),
+    enabled: q.trim().length >= 2,
+  })
+}
+
+export function useSparkline(symbol: string | null, name = '', range = '1mo') {
+  return useQuery({
+    queryKey: ['sparkline', symbol, range],
+    queryFn: () => api.get<{ prices: number[] }>(`/api/sparkline?symbol=${encodeURIComponent(symbol!)}&name=${encodeURIComponent(name)}&range=${range}`),
+    enabled: !!symbol,
+  })
 }
 
 // ── Mutations ───────────────────────────────────────────────────────────────
@@ -72,5 +88,13 @@ export function useAddGoal() {
   return useMutation({
     mutationFn: (body: Record<string, unknown>) => api.post('/api/goals', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }),
+  })
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { name?: string; email?: string }) => api.patch('/api/users/me', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
   })
 }

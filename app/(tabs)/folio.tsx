@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
@@ -13,6 +14,7 @@ import { eur, CAT } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
 
 export default function Folio() {
+  const router = useRouter()
   const stats = useStats()
   const assets = useAssets()
   const loading = stats.isLoading || assets.isLoading
@@ -56,7 +58,7 @@ export default function Folio() {
                 const cat = CAT[a.type] ?? CAT.OTHER
                 const pnl = a.holdings?.[0]?.pnlPercentEur
                 return (
-                  <View key={a.id} style={[styles.row, i > 0 && styles.border]}>
+                  <Pressable key={a.id} onPress={() => router.push(`/product/${a.id}` as Href)} style={[styles.row, i > 0 && styles.border]}>
                     <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
                       <Text style={[styles.logoTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
                     </View>
@@ -68,7 +70,7 @@ export default function Folio() {
                       <Text style={styles.val}>{eur(a.value)}</Text>
                       {typeof pnl === 'number' ? <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} /> : null}
                     </View>
-                  </View>
+                  </Pressable>
                 )
               })}
             </FxCard>
