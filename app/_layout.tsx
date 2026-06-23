@@ -29,9 +29,10 @@ function AuthGate() {
 
   useEffect(() => {
     if (!ready) return
-    const onLogin = segments[0] === 'login'
-    if (!token && !onLogin) router.replace('/login')
-    else if (token && onLogin) router.replace('/(tabs)')
+    const seg = segments[0] as string | undefined
+    const onAuthScreen = seg === 'login' || seg === 'register' || seg === 'forgot'
+    if (!token && !onAuthScreen) router.replace('/login')
+    else if (token && onAuthScreen) router.replace('/(tabs)')
   }, [token, ready, segments])
 
   return (

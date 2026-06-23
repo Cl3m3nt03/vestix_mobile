@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View, ScrollView } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View, ScrollView } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { FxCard } from '@/components/ui/FxCard'
 import { FxButton } from '@/components/ui/FxButton'
@@ -9,6 +10,7 @@ import { useAuth } from '@/lib/auth-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Login() {
+  const router = useRouter()
   const { setToken } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -69,6 +71,17 @@ export default function Login() {
               label={loading ? '...' : needs2FA ? 'Valider le code' : 'Se connecter'}
               onPress={submit}
             />
+
+            {!needs2FA ? (
+              <View style={styles.links}>
+                <Pressable onPress={() => router.push('/forgot')}>
+                  <Text style={styles.link}>Mot de passe oublié ?</Text>
+                </Pressable>
+                <Pressable onPress={() => router.push('/register')}>
+                  <Text style={styles.link}>Créer un compte</Text>
+                </Pressable>
+              </View>
+            ) : null}
           </FxCard>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -114,4 +127,6 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontFamily: font.body, fontSize: 15, color: color.ink },
   err: { fontFamily: font.bodyMed, fontSize: 13, color: color.down },
+  links: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  link: { fontFamily: font.bodySemi, fontSize: 13, color: color.acc },
 })
