@@ -35,6 +35,7 @@ export const color = {
   glass2:      'rgba(255,255,255,0.72)',
   glassStrong: 'rgba(255,255,255,0.82)',
   glassHi:     'rgba(255,255,255,0.90)',
+  navBar:      '#eef5f1', // barre basse — OPAQUE (Android sans blur : pas de noir au travers)
 
   hair:   'rgba(30,55,45,0.10)',
   hair2:  'rgba(30,55,45,0.06)',

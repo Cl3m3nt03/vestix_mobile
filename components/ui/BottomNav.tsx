@@ -1,4 +1,4 @@
-import { StyleSheet, Text, Pressable, View } from 'react-native'
+import { Platform, StyleSheet, Text, Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { color, font, shadow } from '@/theme/tokens'
 
@@ -40,15 +40,19 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: color.glassStrong,
+    backgroundColor: color.navBar,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     borderTopWidth: 1,
     borderColor: color.glassHi,
     paddingTop: 7,
     paddingHorizontal: 8,
-    ...shadow.lg,
-    shadowOffset: { width: 0, height: -14 },
+    // iOS : ombre haute douce. Android : pas d'elevation (sinon halo carré
+    // tout autour qui bave sur les coins arrondis du haut). Séparation = borderTop.
+    ...Platform.select({
+      ios: { ...shadow.lg, shadowOffset: { width: 0, height: -14 } },
+      android: {},
+    }),
   },
   slot: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 4 },
   iconWrap: {
