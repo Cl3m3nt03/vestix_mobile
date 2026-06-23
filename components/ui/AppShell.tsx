@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import Animated, { FadeIn } from 'react-native-reanimated'
 import { bgGradient } from '@/theme/tokens'
 
 /**
@@ -21,7 +22,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <View pointerEvents="none" style={[styles.blob, styles.b1]} />
       <View pointerEvents="none" style={[styles.blob, styles.b2]} />
       <SafeAreaView style={styles.fill} edges={['top']}>
-        {children}
+        <Animated.View style={styles.fill} entering={FadeIn.duration(200)}>
+          {children}
+        </Animated.View>
       </SafeAreaView>
     </LinearGradient>
   )

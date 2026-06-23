@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Slot, useRouter, useSegments } from 'expo-router'
+import { Stack, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -37,7 +37,18 @@ function AuthGate() {
 
   return (
     <ErrorBoundary>
-      <Slot />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+          animationDuration: 220,
+          contentStyle: { backgroundColor: '#efede7' },
+        }}
+      >
+        {/* (tabs) en fondu (changement de contexte), écrans secondaires en slide */}
+        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ animation: 'fade' }} />
+      </Stack>
     </ErrorBoundary>
   )
 }

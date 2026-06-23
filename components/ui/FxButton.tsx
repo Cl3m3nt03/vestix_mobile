@@ -33,7 +33,7 @@ export function FxButton({
         style={({ pressed }) => [
           styles.base,
           styles.ghost,
-          { height: h, paddingHorizontal: px, borderRadius: r, opacity: pressed ? 0.85 : 1 },
+          { height: h, paddingHorizontal: px, borderRadius: r, opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
           style,
         ]}
       >
@@ -47,7 +47,7 @@ export function FxButton({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1, transform: [{ translateY: pressed ? 1 : 0 }] }, style]}
+      style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] }, style]}
     >
       <LinearGradient
         colors={colors}
