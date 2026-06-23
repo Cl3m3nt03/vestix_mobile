@@ -5,6 +5,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxKpi } from '@/components/ui/FxKpi'
+import { Donut, Slice } from '@/components/ui/Donut'
 import { AddBudgetItem } from '@/components/forms/AddBudgetItem'
 import { useBudget } from '@/lib/queries'
 import type { BudgetCategory } from '@/lib/types'
@@ -26,6 +27,14 @@ export default function Budget() {
   const left = income - spent
   const [add, setAdd] = useState(false)
 
+  const slices: Slice[] = (Object.keys(CATS) as BudgetCategory[])
+    .map((c) => ({
+      label: CATS[c].label,
+      value: items.filter((it) => it.category === c).reduce((s, it) => s + it.amount, 0),
+      color: CATS[c].color,
+    }))
+    .filter((s) => s.value > 0)
+
   return (
     <AppShell>
       <AddBudgetItem visible={add} onClose={() => setAdd(false)} />
@@ -46,6 +55,13 @@ export default function Budget() {
               <FxKpi label="Revenu" value={eur(income)} />
               <FxKpi label="Reste" value={eur(left)} trend={{ dir: left >= 0 ? 'up' : 'down', text: `Dépensé ${eur(spent)}` }} />
             </View>
+
+            {slices.length ? (
+              <FxCard>
+                <FxCardHeader title="Répartition" sub="PAR CATÉGORIE" />
+                <Donut centerValue={eur(spent)} centerLabel="Dépensé" slices={slices} />
+              </FxCard>
+            ) : null}
 
             {!items.length ? (
               <FxCard><Text style={styles.muted}>Aucun poste de budget. Ajoute-en depuis le web.</Text></FxCard>

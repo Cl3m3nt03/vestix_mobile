@@ -16,8 +16,11 @@ export default function Pokemon() {
 
   const connected = status.data?.connected
   const pf = data.data?.portfolio
-  const items = data.data?.collection?.items ?? []
-  const history = (data.data?.history ?? []).map((h) => ({ value: h.value }))
+  const rawItems = data.data?.collection?.items
+  const items = Array.isArray(rawItems) ? rawItems : []
+  const rawHistory = data.data?.history
+  const history = (Array.isArray(rawHistory) ? rawHistory : [])
+    .map((h) => ({ value: typeof h?.value === 'number' ? h.value : Number(h?.value) || 0 }))
 
   return (
     <AppShell>
