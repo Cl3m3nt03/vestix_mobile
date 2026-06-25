@@ -9,14 +9,20 @@ import { color, font, radius } from '@/theme/tokens'
 /**
  * Feuille modale par le bas (équivalent natif de `.fx-sheet` / modaux web).
  * Backdrop tap = fermeture, grip, titre, contenu scrollable.
+ *
+ * `fullScreen` : étend le panneau jusqu'en haut (utile pour les wizards
+ * multi-phases comme AddAsset). `leading` : élément optionnel à gauche du
+ * titre (typiquement un bouton « retour »).
  */
 export function Sheet({
-  visible, onClose, title, children,
+  visible, onClose, title, children, fullScreen, leading,
 }: {
   visible: boolean
   onClose: () => void
   title: string
   children: ReactNode
+  fullScreen?: boolean
+  leading?: ReactNode
 }) {
   const insets = useSafeAreaInsets()
   return (
@@ -27,12 +33,20 @@ export function Sheet({
           style={styles.kav}
         >
           <Pressable
-            style={[styles.panel, { paddingBottom: 16 + insets.bottom }]}
+            style={[
+              styles.panel,
+              fullScreen
+                ? { paddingTop: insets.top + 8, paddingBottom: 16 + insets.bottom, height: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }
+                : { paddingBottom: 16 + insets.bottom },
+            ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={styles.grip} />
+            {!fullScreen ? <View style={styles.grip} /> : null}
             <View style={styles.head}>
-              <Text style={styles.title}>{title}</Text>
+              <View style={styles.headLeft}>
+                {leading}
+                <Text style={styles.title}>{title}</Text>
+              </View>
               <Pressable onPress={onClose} style={styles.close} hitSlop={8}>
                 <Feather name="x" size={18} color={color.inkSoft} />
               </Pressable>
@@ -57,7 +71,8 @@ const styles = StyleSheet.create({
   },
   grip: { width: 38, height: 4, borderRadius: 3, backgroundColor: color.hair, alignSelf: 'center', marginBottom: 12 },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
-  title: { fontFamily: font.display, fontSize: 19, color: color.ink },
+  headLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
+  title: { fontFamily: font.display, fontSize: 19, color: color.ink, flexShrink: 1 },
   close: {
     width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
     backgroundColor: color.glass,
