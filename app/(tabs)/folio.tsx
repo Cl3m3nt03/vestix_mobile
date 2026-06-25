@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import Animated, { FadeInUp } from 'react-native-reanimated'
 import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
@@ -58,19 +59,24 @@ export default function Folio() {
                 const cat = CAT[a.type] ?? CAT.OTHER
                 const pnl = a.holdings?.[0]?.pnlPercentEur
                 return (
-                  <Pressable key={a.id} onPress={() => router.push(`/product/${a.id}` as Href)} style={[styles.row, i > 0 && styles.border]}>
-                    <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
-                      <Text style={[styles.logoTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.name} numberOfLines={1}>{a.name}</Text>
-                      <Text style={styles.cat}>{cat.label}{a.institution ? ` · ${a.institution}` : ''}</Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                      <Text style={styles.val}>{eur(a.value)}</Text>
-                      {typeof pnl === 'number' ? <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} /> : null}
-                    </View>
-                  </Pressable>
+                  <Animated.View key={a.id} entering={FadeInUp.duration(280).delay(i * 30)}>
+                    <Pressable
+                      onPress={() => router.push(`/product/${a.id}` as Href)}
+                      style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
+                    >
+                      <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
+                        <Text style={[styles.logoTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.name} numberOfLines={1}>{a.name}</Text>
+                        <Text style={styles.cat}>{cat.label}{a.institution ? ` · ${a.institution}` : ''}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                        <Text style={styles.val}>{eur(a.value)}</Text>
+                        {typeof pnl === 'number' ? <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} /> : null}
+                      </View>
+                    </Pressable>
+                  </Animated.View>
                 )
               })}
             </FxCard>
@@ -89,6 +95,7 @@ const styles = StyleSheet.create({
   err: { fontFamily: font.bodyMed, fontSize: 13.5, color: color.down },
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13 },
   border: { borderTopWidth: 1, borderTopColor: color.hair2 },
+  pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   logo: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   logoTxt: { fontFamily: font.display, fontSize: 12 },
   name: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },

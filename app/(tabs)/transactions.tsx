@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import Animated, { FadeInUp } from 'react-native-reanimated'
 import { Feather } from '@expo/vector-icons'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
@@ -48,20 +49,25 @@ export default function Transactions() {
               const meta = TX[t.type]
               const total = (t.price + (t.fees ?? 0)) * (t.quantity ?? 1)
               return (
-                <Pressable key={t.id} onPress={() => setEditing(t)} style={[styles.row, i > 0 && styles.border]}>
-                  <View style={[styles.ico, { backgroundColor: meta.color + '22' }]}>
-                    <Feather name={meta.icon} size={17} color={meta.color} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.name} numberOfLines={1}>
-                      {meta.label}{t.symbol ? ` · ${t.symbol}` : ''}
+                <Animated.View key={t.id} entering={FadeInUp.duration(260).delay(Math.min(i, 12) * 28)}>
+                  <Pressable
+                    onPress={() => setEditing(t)}
+                    style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
+                  >
+                    <View style={[styles.ico, { backgroundColor: meta.color + '22' }]}>
+                      <Feather name={meta.icon} size={17} color={meta.color} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.name} numberOfLines={1}>
+                        {meta.label}{t.symbol ? ` · ${t.symbol}` : ''}
+                      </Text>
+                      <Text style={styles.sub}>{dateFr(t.date)}{t.quantity ? ` · ${t.quantity} @ ${eur(t.price, 2)}` : ''}</Text>
+                    </View>
+                    <Text style={[styles.amt, { color: meta.sign > 0 ? color.up : color.ink }]}>
+                      {meta.sign > 0 ? '+' : '−'}{eur(total, 2)}
                     </Text>
-                    <Text style={styles.sub}>{dateFr(t.date)}{t.quantity ? ` · ${t.quantity} @ ${eur(t.price, 2)}` : ''}</Text>
-                  </View>
-                  <Text style={[styles.amt, { color: meta.sign > 0 ? color.up : color.ink }]}>
-                    {meta.sign > 0 ? '+' : '−'}{eur(total, 2)}
-                  </Text>
-                </Pressable>
+                  </Pressable>
+                </Animated.View>
               )
             })}
           </FxCard>
@@ -79,6 +85,7 @@ const styles = StyleSheet.create({
   err: { fontFamily: font.bodyMed, fontSize: 13.5, color: color.down },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
   border: { borderTopWidth: 1, borderTopColor: color.hair2 },
+  pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   ico: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   name: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   sub: { fontFamily: font.mono, fontSize: 10.5, color: color.inkFaint, marginTop: 2 },

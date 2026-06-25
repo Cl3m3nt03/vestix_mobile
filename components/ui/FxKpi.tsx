@@ -1,20 +1,26 @@
 import { ReactNode } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { color, radius, shadow, font } from '@/theme/tokens'
+import { AnimatedNumber } from './AnimatedNumber'
 
 /**
  * Carte KPI — label mono uppercase, grande valeur Outfit (tabular-nums),
  * petite icône carrée teintée émeraude. Équivalent natif de `.fx-kpi`.
+ * Si `valueNum` + `format` sont fournis, la valeur est animée (compteur).
  */
 export function FxKpi({
   label,
   value,
+  valueNum,
+  format,
   sub,
   icon,
   trend,
 }: {
   label: string
   value: string
+  valueNum?: number
+  format?: (n: number) => string
   sub?: string
   icon?: ReactNode
   trend?: { dir: 'up' | 'down'; text: string }
@@ -25,9 +31,19 @@ export function FxKpi({
         <Text style={styles.label}>{label}</Text>
         {icon ? <View style={styles.ico}>{icon}</View> : null}
       </View>
-      <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
-        {value}
-      </Text>
+      {typeof valueNum === 'number' && format ? (
+        <AnimatedNumber
+          value={valueNum}
+          format={format}
+          style={styles.value}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        />
+      ) : (
+        <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
+          {value}
+        </Text>
+      )}
       {trend ? (
         <Text style={[styles.sub, { color: trend.dir === 'up' ? color.up : color.down }]}>
           {trend.dir === 'up' ? '▲ ' : '▼ '}
