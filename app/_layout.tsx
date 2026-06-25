@@ -55,6 +55,9 @@ function AuthGate() {
         {/* (tabs) en fondu (changement de contexte), écrans secondaires en slide */}
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        {/* assistant : le rendu est un Sheet (slide depuis le bas), on désactive
+            l'animation de transition de route pour éviter le double slide. */}
+        <Stack.Screen name="assistant" options={{ animation: 'none' }} />
       </Stack>
     </ErrorBoundary>
   )
