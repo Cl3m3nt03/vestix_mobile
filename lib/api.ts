@@ -39,32 +39,63 @@ export const api = {
   del:   <T>(p: string) => request<T>(p, { method: 'DELETE' }),
 }
 
-// ── Assistant IA (réponse en texte brut, pas JSON) ──────────────────────────
+// ── Assistant IA (réponse streamée en texte brut, pas JSON) ─────────────────
 import type { ChatMessage } from './types'
 
-export async function sendChat(messages: ChatMessage[]): Promise<string> {
-  const token = await getToken()
-  const res = await fetch(`${BASE}/api/assistant`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ messages }),
+/**
+ * Envoie la conversation à l'API streaming et appelle `onChunk` à chaque
+ * morceau de texte reçu (depuis le ReadableStream côté serveur). Résout
+ * avec la réponse complète une fois la connexion fermée.
+ *
+ * Implémentation via XMLHttpRequest car React Native ne supporte pas
+ * `response.body.getReader()` de manière fiable cross-platform — XHR a un
+ * readyState 3 qui donne le `responseText` progressif.
+ */
+export function sendChatStream(
+  messages: ChatMessage[],
+  onChunk: (text: string) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let token: string | null = null
+    getToken().then((t) => {
+      token = t
+      const xhr = new XMLHttpRequest()
+      let lastLen = 0
+
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState >= 3 && xhr.status === 200) {
+          const newText = xhr.responseText.slice(lastLen)
+          lastLen = xhr.responseText.length
+          if (newText) onChunk(newText)
+        }
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            resolve(xhr.responseText)
+            return
+          }
+          if (xhr.status === 401) clearToken()
+          try {
+            const j = JSON.parse(xhr.responseText)
+            if (j.requiresConsent) { reject(new ApiError(403, 'CONSENT_REQUIRED')); return }
+            reject(new ApiError(xhr.status, j.error ?? j.message ?? `HTTP ${xhr.status}`))
+          } catch {
+            reject(new ApiError(xhr.status, `HTTP ${xhr.status}`))
+          }
+        }
+      }
+      xhr.onerror = () => reject(new ApiError(0, 'Erreur réseau'))
+
+      xhr.open('POST', `${BASE}/api/assistant`)
+      xhr.setRequestHeader('Content-Type', 'application/json')
+      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      xhr.send(JSON.stringify({ messages }))
+    })
   })
-  const text = await res.text()
-  if (!res.ok) {
-    // 403 consentement requis → JSON ; sinon message d'erreur
-    try {
-      const j = JSON.parse(text)
-      if (j.requiresConsent) throw new ApiError(403, 'CONSENT_REQUIRED')
-      throw new ApiError(res.status, j.error ?? j.message ?? `HTTP ${res.status}`)
-    } catch (e) {
-      if (e instanceof ApiError) throw e
-      throw new ApiError(res.status, `HTTP ${res.status}`)
-    }
-  }
-  return text
+}
+
+/** Wrapper non-streaming (rétro-compat) — résout avec la réponse complète. */
+export async function sendChat(messages: ChatMessage[]): Promise<string> {
+  return sendChatStream(messages, () => {})
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────
