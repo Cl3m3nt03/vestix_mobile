@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import { ActivityIndicator, Alert, Animated as RNAnimated, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
 import Animated, { FadeInUp } from 'react-native-reanimated'
 import { Swipeable } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
@@ -15,6 +15,8 @@ import { useStats, useAssets, useDeleteAsset } from '@/lib/queries'
 import type { AssetType, Asset } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
 import { color, font, radius } from '@/theme/tokens'
+
+const ACTION_WIDTH = 96
 
 export default function Folio() {
   const router = useRouter()
@@ -100,12 +102,26 @@ function AssetRow({
     )
   }
 
-  const renderRightActions = () => (
-    <Pressable onPress={askDelete} style={({ pressed }) => [styles.deleteAction, pressed && { opacity: 0.85 }]}>
-      <Feather name="trash-2" size={22} color={color.white} />
-      <Text style={styles.deleteTxt}>Supprimer</Text>
-    </Pressable>
-  )
+  const renderRightActions = (
+    _progress: RNAnimated.AnimatedInterpolation<number>,
+    dragX: RNAnimated.AnimatedInterpolation<number>,
+  ) => {
+    // Le bouton « suit » le doigt depuis la droite : tant que le swipe n'est
+    // pas complet, il translate avec le drag et ne se superpose pas à la row.
+    const translateX = dragX.interpolate({
+      inputRange: [-ACTION_WIDTH, 0],
+      outputRange: [0, ACTION_WIDTH],
+      extrapolate: 'clamp',
+    })
+    return (
+      <RNAnimated.View style={[styles.deleteWrap, { transform: [{ translateX }] }]}>
+        <Pressable onPress={askDelete} style={({ pressed }) => [styles.deleteAction, pressed && { opacity: 0.85 }]}>
+          <Feather name="trash-2" size={22} color={color.white} />
+          <Text style={styles.deleteTxt}>Supprimer</Text>
+        </Pressable>
+      </RNAnimated.View>
+    )
+  }
 
   return (
     <Swipeable
@@ -140,7 +156,8 @@ const styles = StyleSheet.create({
   center: { paddingVertical: 60, alignItems: 'center' },
   muted: { fontFamily: font.body, fontSize: 13.5, color: color.inkSoft },
   err: { fontFamily: font.bodyMed, fontSize: 13.5, color: color.down },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, backgroundColor: 'transparent' },
+  // bg opaque : la row masque le bouton supprimer tant qu'elle n'a pas glissé
+  row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, paddingHorizontal: 2, backgroundColor: color.card },
   border: { borderTopWidth: 1, borderTopColor: color.hair2 },
   pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   logo: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
@@ -148,8 +165,9 @@ const styles = StyleSheet.create({
   name: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   cat: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.4, textTransform: 'uppercase', color: color.inkFaint, marginTop: 2 },
   val: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink, fontVariant: ['tabular-nums'] },
+  deleteWrap: { width: ACTION_WIDTH, justifyContent: 'center' },
   deleteAction: {
-    width: 96, alignItems: 'center', justifyContent: 'center', gap: 4,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4,
     backgroundColor: color.down, borderRadius: radius.sm,
     marginLeft: 8, marginVertical: 4,
   },
