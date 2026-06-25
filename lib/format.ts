@@ -15,6 +15,21 @@ export const CAT: Record<AssetType, { label: string; color: string }> = {
   SAVINGS:      { label: 'Épargne',    color: color.d2 },
   BANK_ACCOUNT: { label: 'Banque',     color: color.info },
   REAL_ESTATE:  { label: 'Immo',       color: color.violet },
+  LIABILITY:    { label: 'Dette',      color: color.down },
   COLLECTION:   { label: 'Collection', color: color.d4 },
   OTHER:        { label: 'Autre',      color: color.inkFaint },
+}
+
+/** Emoji icône par type d'actif — réutilisé du web. */
+export const TYPE_EMOJI: Record<AssetType, string> = {
+  BANK_ACCOUNT: '🏦',
+  SAVINGS:      '🐖',
+  REAL_ESTATE:  '🏠',
+  STOCK:        '📈',
+  CRYPTO:       '₿',
+  PEA:          '🇫🇷',
+  CTO:          '📊',
+  LIABILITY:    '💳',
+  COLLECTION:   '🎴',
+  OTHER:        '📦',
 }

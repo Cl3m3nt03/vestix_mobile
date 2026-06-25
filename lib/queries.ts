@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type {
-  PortfolioStats, Asset, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult,
+  PortfolioStats, Asset, AssetType, Me, Transaction, BudgetData, Goal, Performance, Fiscal, SearchResult,
+  AssetSearchResult, PriceData,
   Institution, BankConnection, BankTx,
   HoloStatus, HoloData, PriceAlert, RebalanceResult,
 } from './types'
@@ -44,6 +45,27 @@ export function useSearch(q: string) {
     queryKey: ['search', q],
     queryFn: () => api.get<SearchResult>(`/api/global-search?q=${encodeURIComponent(q)}`),
     enabled: q.trim().length >= 2,
+  })
+}
+
+/** Recherche d'un titre/crypto par symbole/nom/ISIN — alimente le formulaire d'actif. */
+export function useAssetSearch(q: string, type: AssetType) {
+  return useQuery({
+    queryKey: ['asset-search', type, q],
+    queryFn: () => api.get<AssetSearchResult[]>(`/api/search?q=${encodeURIComponent(q)}&type=${type}`),
+    enabled: q.trim().length >= 1,
+    staleTime: 30_000,
+  })
+}
+
+/** Prix temps réel pour une liste de symboles (séparés par virgule côté URL). */
+export function usePrices(symbols: string[]) {
+  const key = symbols.join(',')
+  return useQuery({
+    queryKey: ['prices', key],
+    queryFn: () => api.get<PriceData[]>(`/api/prices?symbols=${encodeURIComponent(key)}`),
+    enabled: symbols.length > 0,
+    staleTime: 30_000,
   })
 }
 

@@ -2,7 +2,8 @@
 
 export type AssetType =
   | 'BANK_ACCOUNT' | 'SAVINGS' | 'REAL_ESTATE'
-  | 'STOCK' | 'CRYPTO' | 'PEA' | 'CTO' | 'OTHER' | 'COLLECTION'
+  | 'STOCK' | 'CRYPTO' | 'PEA' | 'CTO'
+  | 'LIABILITY' | 'OTHER' | 'COLLECTION'
 
 export type AssetBreakdown = Record<AssetType, number>
 
@@ -24,6 +25,7 @@ export interface Holding {
   quantity: number
   avgBuyPrice: number
   currency: string
+  buyDate?: string | null
   currentPrice?: number
   pnlPercentEur?: number
 }
@@ -35,8 +37,33 @@ export interface Asset {
   institution: string | null
   value: number          // EUR
   currency: string
+  notes?: string | null
+  interestRate?: number | null
+  monthlyPayment?: number | null
+  linkedAssetId?: string | null
   holdings: Holding[]
   readOnly?: boolean
+}
+
+/** Résultat d'une recherche de titre/crypto (≠ SearchResult global). */
+export interface AssetSearchResult {
+  symbol: string
+  name: string
+  exchange?: string
+  isin?: string
+  coinId?: string
+  marketCapRank?: number
+  thumb?: string
+}
+
+/** Donnée de prix renvoyée par /api/prices. */
+export interface PriceData {
+  symbol: string
+  price: number
+  changePercent24h?: number
+  changePct24h?: number
+  change24h?: number
+  isMock?: boolean
 }
 
 export type TxType = 'BUY' | 'SELL' | 'DEPOSIT' | 'WITHDRAWAL' | 'DIVIDEND'
