@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import Animated, { FadeInUp } from 'react-native-reanimated'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
@@ -54,8 +55,14 @@ export default function Budget() {
         ) : (
           <>
             <View style={styles.kpis}>
-              <FxKpi label="Revenu" value={eur(income)} />
-              <FxKpi label="Reste" value={eur(left)} trend={{ dir: left >= 0 ? 'up' : 'down', text: `Dépensé ${eur(spent)}` }} />
+              <FxKpi label="Revenu" value={eur(income)} valueNum={income} format={(n) => eur(n)} />
+              <FxKpi
+                label="Reste"
+                value={eur(left)}
+                valueNum={left}
+                format={(n) => eur(n)}
+                trend={{ dir: left >= 0 ? 'up' : 'down', text: `Dépensé ${eur(spent)}` }}
+              />
             </View>
 
             {slices.length ? (
@@ -76,11 +83,16 @@ export default function Budget() {
                   <FxCard key={c}>
                     <FxCardHeader title={CATS[c].label} sub={eur(sum)} />
                     {list.map((it, i) => (
-                      <Pressable key={it.id} onPress={() => setEditing(it)} style={[styles.row, i > 0 && styles.border]}>
-                        <View style={[styles.dot, { backgroundColor: CATS[c].color }]} />
-                        <Text style={styles.name} numberOfLines={1}>{it.label}</Text>
-                        <Text style={styles.val}>{eur(it.amount)}</Text>
-                      </Pressable>
+                      <Animated.View key={it.id} entering={FadeInUp.duration(240).delay(i * 30)}>
+                        <Pressable
+                          onPress={() => setEditing(it)}
+                          style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
+                        >
+                          <View style={[styles.dot, { backgroundColor: CATS[c].color }]} />
+                          <Text style={styles.name} numberOfLines={1}>{it.label}</Text>
+                          <Text style={styles.val}>{eur(it.amount)}</Text>
+                        </Pressable>
+                      </Animated.View>
                     ))}
                   </FxCard>
                 )
@@ -102,6 +114,7 @@ const styles = StyleSheet.create({
   kpis: { flexDirection: 'row', gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 11 },
   border: { borderTopWidth: 1, borderTopColor: color.hair2 },
+  pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   dot: { width: 10, height: 10, borderRadius: 5 },
   name: { flex: 1, fontFamily: font.bodyMed, fontSize: 14, color: color.ink },
   val: { fontFamily: font.bodySemi, fontSize: 14, color: color.ink, fontVariant: ['tabular-nums'] },

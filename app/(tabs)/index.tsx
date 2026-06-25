@@ -1,4 +1,5 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native'
+import Animated, { FadeInUp } from 'react-native-reanimated'
 import { Feather } from '@expo/vector-icons'
 import { useRouter, type Href } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -66,6 +67,8 @@ export default function Dashboard() {
               <FxKpi
                 label="Total"
                 value={eur(stats.data!.totalValue)}
+                valueNum={stats.data!.totalValue}
+                format={(n) => eur(n)}
                 icon={<Feather name="layers" size={17} color={color.acc} />}
                 trend={{
                   dir: stats.data!.totalPnl >= 0 ? 'up' : 'down',
@@ -75,6 +78,8 @@ export default function Dashboard() {
               <FxKpi
                 label="Plus-value"
                 value={`${stats.data!.totalPnl >= 0 ? '+' : ''}${eur(stats.data!.totalPnl)}`}
+                valueNum={stats.data!.totalPnl}
+                format={(n) => `${n >= 0 ? '+' : ''}${eur(n)}`}
                 icon={<Feather name="trending-up" size={17} color={color.acc} />}
                 sub={`Investi ${eur(stats.data!.totalInvested)}`}
               />
@@ -98,7 +103,11 @@ export default function Dashboard() {
                   const cat = CAT[a.type] ?? CAT.OTHER
                   const pnl = a.holdings?.[0]?.pnlPercentEur
                   return (
-                    <View key={a.id} style={[styles.assetRow, i > 0 && styles.assetBorder]}>
+                    <Animated.View
+                      key={a.id}
+                      entering={FadeInUp.duration(280).delay(i * 35)}
+                      style={[styles.assetRow, i > 0 && styles.assetBorder]}
+                    >
                       <View style={[styles.tickLogo, { backgroundColor: cat.color + '22' }]}>
                         <Text style={[styles.tickTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
                       </View>
@@ -112,7 +121,7 @@ export default function Dashboard() {
                           <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} />
                         ) : null}
                       </View>
-                    </View>
+                    </Animated.View>
                   )
                 })
               )}
