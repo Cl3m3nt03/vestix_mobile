@@ -1,24 +1,28 @@
 import { useState, useEffect } from 'react'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import Animated, { FadeInUp } from 'react-native-reanimated'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Feather } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
-import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
+import { FxCard } from '@/components/ui/FxCard'
 import { FxButton } from '@/components/ui/FxButton'
-import { FxBadge } from '@/components/ui/FxBadge'
 import { Field } from '@/components/ui/Field'
-import { useMe, useUpdateProfile } from '@/lib/queries'
+import { useMe, useUpdateProfile, useAssets } from '@/lib/queries'
 import { api, ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
-import { color, font } from '@/theme/tokens'
+import { eur } from '@/lib/format'
+import { color, font, radius, shadow, accentGradient } from '@/theme/tokens'
 
 export default function Settings() {
   const router = useRouter()
   const qc = useQueryClient()
   const me = useMe()
+  const assets = useAssets()
   const update = useUpdateProfile()
   const { signOut } = useAuth()
 
@@ -34,6 +38,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (me.data) { setName(me.data.name ?? ''); setEmail(me.data.email) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me.data?.id])
 
   const saveProfile = async () => {
@@ -108,6 +113,9 @@ export default function Settings() {
     } finally { setDeleting(false) }
   }
 
+  const initials = (me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()
+  const assetCount = assets.data?.length ?? 0
+
   return (
     <AppShell>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -117,50 +125,146 @@ export default function Settings() {
           <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
         ) : (
           <>
-            <FxCard>
-              <FxCardHeader title="Profil" />
+            {/* Hero profil */}
+            <Animated.View entering={FadeInUp.duration(260)}>
+              <View style={styles.hero}>
+                <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg}>
+                  <View style={styles.heroTop}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarTxt}>{initials}</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.heroName} numberOfLines={1}>
+                        {me.data?.name ?? 'Mon compte'}
+                      </Text>
+                      <Text style={styles.heroEmail} numberOfLines={1}>{me.data?.email}</Text>
+                    </View>
+                    <View style={[styles.shield, { backgroundColor: enabled ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)' }]}>
+                      <Feather name={enabled ? 'shield' : 'shield-off'} size={14} color={color.white} />
+                      <Text style={styles.shieldTxt}>{enabled ? '2FA' : 'No 2FA'}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.heroStats}>
+                    <View style={styles.heroStat}>
+                      <Text style={styles.heroStatLabel}>ACTIFS</Text>
+                      <Text style={styles.heroStatValue}>{assetCount}</Text>
+                    </View>
+                    <View style={styles.heroDivider} />
+                    <View style={styles.heroStat}>
+                      <Text style={styles.heroStatLabel}>ID</Text>
+                      <Text style={styles.heroStatValue} numberOfLines={1}>
+                        {(me.data?.id ?? '').slice(0, 6)}…
+                      </Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              </View>
+            </Animated.View>
+
+            {/* Section : Identité */}
+            <Section
+              eyebrow="IDENTITÉ"
+              title="Profil"
+              icon="user"
+              tone={color.acc}
+              delay={80}
+            >
               <Field label="Nom" value={name} onChangeText={setName} />
               <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
               {msg ? <Text style={styles.msg}>{msg}</Text> : null}
-              <FxButton label={update.isPending ? '...' : 'Enregistrer'} onPress={saveProfile} />
-            </FxCard>
+              <FxButton label={update.isPending ? '…' : 'Enregistrer'} onPress={saveProfile} />
+            </Section>
 
-            <FxCard>
-              <FxCardHeader
-                title="Double authentification"
-                sub="CODE EMAIL À LA CONNEXION"
-                right={enabled ? <FxBadge label="Active" tone="live" /> : <FxBadge label="Inactive" tone="soft" />}
-              />
+            {/* Section : Sécurité */}
+            <Section
+              eyebrow="SÉCURITÉ"
+              title="Double authentification"
+              icon="shield"
+              tone={color.violet}
+              right={
+                <View style={[styles.statusPill, enabled ? styles.statusOn : styles.statusOff]}>
+                  <View style={[styles.statusDot, { backgroundColor: enabled ? color.up : color.inkFaint }]} />
+                  <Text style={[styles.statusTxt, { color: enabled ? color.up : color.inkSoft }]}>
+                    {enabled ? 'Active' : 'Inactive'}
+                  </Text>
+                </View>
+              }
+              delay={120}
+            >
+              <Text style={styles.muted}>
+                Reçois un code à 6 chiffres par email à chaque connexion. Recommandé.
+              </Text>
               {mode ? (
                 <>
-                  <Text style={styles.muted}>Code à 6 chiffres envoyé par email.</Text>
-                  <Field label="Code OTP" value={code} onChangeText={setCode} keyboardType="number-pad" />
+                  <Field label="Code OTP (email)" value={code} onChangeText={setCode} keyboardType="number-pad" />
                   {tfaErr ? <Text style={styles.err}>{tfaErr}</Text> : null}
-                  <FxButton label={busy ? '...' : 'Valider'} onPress={confirmTfa} />
+                  <FxButton label={busy ? '…' : 'Valider'} onPress={confirmTfa} />
                 </>
               ) : (
                 <>
                   {tfaErr ? <Text style={styles.err}>{tfaErr}</Text> : null}
                   <FxButton
-                    label={busy ? '...' : enabled ? 'Désactiver la 2FA' : 'Activer la 2FA'}
+                    label={busy ? '…' : enabled ? 'Désactiver la 2FA' : 'Activer la 2FA'}
                     variant={enabled ? 'danger' : 'primary'}
                     onPress={() => startTfa(enabled ? 'disable' : 'enable')}
                   />
                 </>
               )}
-            </FxCard>
+            </Section>
 
-            <FxCard>
-              <FxCardHeader title="Mon compte" sub="DONNÉES RGPD" />
+            {/* Section : Données */}
+            <Section
+              eyebrow="RGPD"
+              title="Mes données"
+              icon="download"
+              tone={color.info}
+              delay={160}
+            >
+              <Text style={styles.muted}>
+                Télécharge l'intégralité de tes données au format JSON pour les conserver ou les migrer.
+              </Text>
               <FxButton label={exporting ? 'Export…' : 'Exporter mes données'} variant="ghost" onPress={exportData} />
-              <View style={styles.sep} />
-              <Text style={styles.danger}>Zone sensible</Text>
-              <Field label="Mot de passe (pour supprimer le compte)" value={delPwd} onChangeText={setDelPwd} secureTextEntry />
-              {delErr ? <Text style={styles.err}>{delErr}</Text> : null}
-              <FxButton label={deleting ? '...' : 'Supprimer mon compte'} variant="danger" onPress={confirmDeleteAccount} />
-            </FxCard>
+            </Section>
 
-            <FxButton label="Se déconnecter" variant="ghost" onPress={signOut} />
+            {/* Section : Zone sensible */}
+            <Animated.View entering={FadeInUp.duration(260).delay(200)}>
+              <View style={styles.dangerWrap}>
+                <View style={styles.dangerHead}>
+                  <View style={[styles.sectionIco, { backgroundColor: 'rgba(206,81,77,0.12)' }]}>
+                    <Feather name="alert-triangle" size={15} color={color.down} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.sectionEyebrow}>IRRÉVERSIBLE</Text>
+                    <Text style={[styles.sectionTitle, { color: color.down }]}>Zone sensible</Text>
+                  </View>
+                </View>
+                <FxCard style={styles.dangerCard}>
+                  <Text style={styles.muted}>
+                    La suppression efface définitivement ton compte et toutes tes données.
+                    Pour confirmer, saisis ton mot de passe.
+                  </Text>
+                  <Field
+                    label="Mot de passe"
+                    value={delPwd}
+                    onChangeText={setDelPwd}
+                    secureTextEntry
+                    placeholder="••••••••"
+                  />
+                  {delErr ? <Text style={styles.err}>{delErr}</Text> : null}
+                  <FxButton label={deleting ? '…' : 'Supprimer mon compte'} variant="danger" onPress={confirmDeleteAccount} />
+                </FxCard>
+              </View>
+            </Animated.View>
+
+            <Animated.View entering={FadeInUp.duration(240).delay(240)}>
+              <Pressable
+                onPress={signOut}
+                style={({ pressed }) => [styles.logout, pressed && { opacity: 0.85, transform: [{ scale: 0.985 }] }]}
+              >
+                <Feather name="log-out" size={15} color={color.inkSoft} />
+                <Text style={styles.logoutTxt}>Se déconnecter</Text>
+              </Pressable>
+            </Animated.View>
           </>
         )}
         <View style={{ height: 16 }} />
@@ -169,12 +273,97 @@ export default function Settings() {
   )
 }
 
+/** En-tête de section : icône carrée teintée + eyebrow mono + titre Outfit. */
+function Section({
+  eyebrow, title, icon, tone, right, delay, children,
+}: {
+  eyebrow: string
+  title: string
+  icon: keyof typeof Feather.glyphMap
+  tone: string
+  right?: React.ReactNode
+  delay: number
+  children: React.ReactNode
+}) {
+  return (
+    <Animated.View entering={FadeInUp.duration(260).delay(delay)}>
+      <View style={styles.sectionHead}>
+        <View style={[styles.sectionIco, { backgroundColor: tone + '1f' }]}>
+          <Feather name={icon} size={15} color={tone} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.sectionEyebrow}>{eyebrow}</Text>
+          <Text style={styles.sectionTitle}>{title}</Text>
+        </View>
+        {right}
+      </View>
+      <FxCard>{children}</FxCard>
+    </Animated.View>
+  )
+}
+
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 18 },
   center: { paddingVertical: 60, alignItems: 'center' },
-  muted: { fontFamily: font.body, fontSize: 13, color: color.inkSoft, marginBottom: 10 },
+  muted: { fontFamily: font.body, fontSize: 13, color: color.inkSoft, marginBottom: 12, lineHeight: 18 },
   msg: { fontFamily: font.bodyMed, fontSize: 13, color: color.acc, marginBottom: 10 },
   err: { fontFamily: font.bodyMed, fontSize: 13, color: color.down, marginBottom: 10 },
-  sep: { height: 1, backgroundColor: color.hair2, marginVertical: 14 },
-  danger: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: color.down, marginBottom: 10 },
+
+  // Hero
+  hero: { borderRadius: 24, overflow: 'hidden', ...shadow.sm, shadowColor: color.acc },
+  heroBg: { padding: 18, gap: 16 },
+  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: {
+    width: 56, height: 56, borderRadius: 28,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
+  },
+  avatarTxt: { fontFamily: font.display, fontSize: 18, color: color.white },
+  heroName: { fontFamily: font.display, fontSize: 19, color: color.white },
+  heroEmail: { fontFamily: font.body, fontSize: 12.5, color: 'rgba(255,255,255,0.78)', marginTop: 2 },
+  shield: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 9, paddingVertical: 6, borderRadius: 999,
+  },
+  shieldTxt: { fontFamily: font.monoSemi, fontSize: 10, color: color.white, letterSpacing: 0.5 },
+  heroStats: {
+    flexDirection: 'row', alignItems: 'stretch',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 14, padding: 12, gap: 12,
+  },
+  heroStat: { flex: 1 },
+  heroStatLabel: { fontFamily: font.mono, fontSize: 9.5, letterSpacing: 0.8, color: 'rgba(255,255,255,0.70)' },
+  heroStatValue: { fontFamily: font.monoSemi, fontSize: 15, color: color.white, marginTop: 3, fontVariant: ['tabular-nums'] },
+  heroDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.18)' },
+
+  // Section
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: 10, paddingHorizontal: 2 },
+  sectionIco: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  sectionEyebrow: { fontFamily: font.mono, fontSize: 9.5, letterSpacing: 1.4, color: color.inkFaint },
+  sectionTitle: { fontFamily: font.display, fontSize: 16, color: color.ink, marginTop: 2 },
+
+  // Status pill (sécurité)
+  statusPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 9, paddingVertical: 5, borderRadius: 999,
+    borderWidth: 1,
+  },
+  statusOn:  { backgroundColor: 'rgba(0,137,84,0.10)', borderColor: 'rgba(0,137,84,0.35)' },
+  statusOff: { backgroundColor: color.glass2,          borderColor: color.glassHi },
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  statusTxt: { fontFamily: font.monoSemi, fontSize: 10, letterSpacing: 0.5 },
+
+  // Zone sensible
+  dangerWrap: { gap: 0 },
+  dangerHead: { flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: 10, paddingHorizontal: 2 },
+  dangerCard: { borderColor: 'rgba(206,81,77,0.22)' },
+
+  // Logout
+  logout: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    paddingVertical: 14, marginTop: 4, borderRadius: radius.sm,
+    backgroundColor: color.glass2, borderWidth: 1, borderColor: color.glassHi,
+  },
+  logoutTxt: { fontFamily: font.bodySemi, fontSize: 13.5, color: color.inkSoft },
 })
