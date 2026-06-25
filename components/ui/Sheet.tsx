@@ -11,15 +11,22 @@ import { color, font, radius } from '@/theme/tokens'
  * Hauteur auto-ajustée au contenu (cap à 88 % pour laisser de l'air). Backdrop
  * tap = fermeture. `leading` = élément optionnel à gauche du titre (typique :
  * bouton retour pour un wizard multi-phases).
+ *
+ * - `bodyScroll: false` désactive la ScrollView interne (utile pour un chat
+ *   qui gère son propre scroll + un input bar fixe en bas).
+ * - `fullHeight: true` force le panel à occuper 88 % de la hauteur (utile
+ *   pour les écrans denses comme un chat où on veut toujours la même surface).
  */
 export function Sheet({
-  visible, onClose, title, children, leading,
+  visible, onClose, title, children, leading, bodyScroll = true, fullHeight,
 }: {
   visible: boolean
   onClose: () => void
   title: string
   children: ReactNode
   leading?: ReactNode
+  bodyScroll?: boolean
+  fullHeight?: boolean
 }) {
   const insets = useSafeAreaInsets()
   return (
@@ -30,7 +37,11 @@ export function Sheet({
           style={styles.kav}
         >
           <Pressable
-            style={[styles.panel, { paddingBottom: 16 + insets.bottom }]}
+            style={[
+              styles.panel,
+              { paddingBottom: 16 + insets.bottom },
+              fullHeight && styles.panelFull,
+            ]}
             onPress={(e) => e.stopPropagation()}
           >
             <View style={styles.grip} />
@@ -43,9 +54,13 @@ export function Sheet({
                 <Feather name="x" size={18} color={color.inkSoft} />
               </Pressable>
             </View>
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              {children}
-            </ScrollView>
+            {bodyScroll ? (
+              <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                {children}
+              </ScrollView>
+            ) : (
+              <View style={styles.bodyFlex}>{children}</View>
+            )}
           </Pressable>
         </KeyboardAvoidingView>
       </Pressable>
@@ -61,6 +76,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 26, borderTopRightRadius: 26,
     paddingHorizontal: 18, paddingTop: 10, maxHeight: '88%',
   },
+  panelFull: { height: '88%' },
+  bodyFlex: { flex: 1, minHeight: 0 },
   grip: { width: 38, height: 4, borderRadius: 3, backgroundColor: color.hair, alignSelf: 'center', marginBottom: 12 },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   headLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
