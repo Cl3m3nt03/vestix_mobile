@@ -8,20 +8,17 @@ import { color, font, radius } from '@/theme/tokens'
 
 /**
  * Feuille modale par le bas (équivalent natif de `.fx-sheet` / modaux web).
- * Backdrop tap = fermeture, grip, titre, contenu scrollable.
- *
- * `fullScreen` : étend le panneau jusqu'en haut (utile pour les wizards
- * multi-phases comme AddAsset). `leading` : élément optionnel à gauche du
- * titre (typiquement un bouton « retour »).
+ * Hauteur auto-ajustée au contenu (cap à 88 % pour laisser de l'air). Backdrop
+ * tap = fermeture. `leading` = élément optionnel à gauche du titre (typique :
+ * bouton retour pour un wizard multi-phases).
  */
 export function Sheet({
-  visible, onClose, title, children, fullScreen, leading,
+  visible, onClose, title, children, leading,
 }: {
   visible: boolean
   onClose: () => void
   title: string
   children: ReactNode
-  fullScreen?: boolean
   leading?: ReactNode
 }) {
   const insets = useSafeAreaInsets()
@@ -33,15 +30,10 @@ export function Sheet({
           style={styles.kav}
         >
           <Pressable
-            style={[
-              styles.panel,
-              fullScreen
-                ? { paddingTop: insets.top + 8, paddingBottom: 16 + insets.bottom, height: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }
-                : { paddingBottom: 16 + insets.bottom },
-            ]}
+            style={[styles.panel, { paddingBottom: 16 + insets.bottom }]}
             onPress={(e) => e.stopPropagation()}
           >
-            {!fullScreen ? <View style={styles.grip} /> : null}
+            <View style={styles.grip} />
             <View style={styles.head}>
               <View style={styles.headLeft}>
                 {leading}

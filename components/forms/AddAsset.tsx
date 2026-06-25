@@ -253,7 +253,7 @@ export function AddAsset({
   ) : null
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={title} fullScreen leading={leading}>
+    <Sheet visible={visible} onClose={onClose} title={title} leading={leading}>
       {phase === 'type' && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Quel type d'actif ?</Text>
