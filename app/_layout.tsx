@@ -18,7 +18,14 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 SplashScreen.preventAutoHideAsync()
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60_000,
+      gcTime: 30 * 60_000,
+      retry: 1,
+      placeholderData: (prev: unknown) => prev,
+    },
+  },
 })
 
 /** Redirige selon la présence du JWT : pas de token → /login, token → dashboard. */

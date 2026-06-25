@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <View pointerEvents="none" style={[styles.blob, styles.b1]} />
       <View pointerEvents="none" style={[styles.blob, styles.b2]} />
       <SafeAreaView style={styles.fill} edges={['top']}>
-        <Animated.View style={styles.fill} entering={FadeIn.duration(200)}>
+        <Animated.View style={styles.fill} entering={FadeIn.duration(120)}>
           {children}
         </Animated.View>
       </SafeAreaView>
