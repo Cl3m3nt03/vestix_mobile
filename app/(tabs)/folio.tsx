@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import { useState, useRef } from 'react'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
 import Animated, { FadeInUp } from 'react-native-reanimated'
+import { Swipeable } from 'react-native-gesture-handler'
+import { Feather } from '@expo/vector-icons'
 import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
@@ -9,10 +11,10 @@ import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxPill } from '@/components/ui/FxPill'
 import { Donut, Slice } from '@/components/ui/Donut'
 import { AddAsset } from '@/components/forms/AddAsset'
-import { useStats, useAssets } from '@/lib/queries'
-import type { AssetType } from '@/lib/types'
+import { useStats, useAssets, useDeleteAsset } from '@/lib/queries'
+import type { AssetType, Asset } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
-import { color, font } from '@/theme/tokens'
+import { color, font, radius } from '@/theme/tokens'
 
 export default function Folio() {
   const router = useRouter()
@@ -55,30 +57,15 @@ export default function Folio() {
 
             <FxCard>
               <FxCardHeader title="Tous les actifs" sub={`${assets.data!.length} LIGNES`} />
-              {assets.data!.map((a, i) => {
-                const cat = CAT[a.type] ?? CAT.OTHER
-                const pnl = a.holdings?.[0]?.pnlPercentEur
-                return (
-                  <Animated.View key={a.id} entering={FadeInUp.duration(280).delay(i * 30)}>
-                    <Pressable
-                      onPress={() => router.push(`/product/${a.id}` as Href)}
-                      style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
-                    >
-                      <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
-                        <Text style={[styles.logoTxt, { color: cat.color }]}>{a.name.slice(0, 3).toUpperCase()}</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.name} numberOfLines={1}>{a.name}</Text>
-                        <Text style={styles.cat}>{cat.label}{a.institution ? ` · ${a.institution}` : ''}</Text>
-                      </View>
-                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                        <Text style={styles.val}>{eur(a.value)}</Text>
-                        {typeof pnl === 'number' ? <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} /> : null}
-                      </View>
-                    </Pressable>
-                  </Animated.View>
-                )
-              })}
+              {assets.data!.map((a, i) => (
+                <Animated.View key={a.id} entering={FadeInUp.duration(280).delay(i * 30)}>
+                  <AssetRow
+                    asset={a}
+                    first={i === 0}
+                    onPress={() => router.push(`/product/${a.id}` as Href)}
+                  />
+                </Animated.View>
+              ))}
             </FxCard>
           </>
         )}
@@ -88,12 +75,72 @@ export default function Folio() {
   )
 }
 
+/** Ligne d'actif avec swipe-to-delete vers la gauche (action poubelle rouge). */
+function AssetRow({
+  asset, first, onPress,
+}: {
+  asset: Asset
+  first: boolean
+  onPress: () => void
+}) {
+  const cat = CAT[asset.type] ?? CAT.OTHER
+  const pnl = asset.holdings?.[0]?.pnlPercentEur
+  const del = useDeleteAsset()
+  const ref = useRef<Swipeable | null>(null)
+
+  const askDelete = () => {
+    Alert.alert(
+      'Supprimer cet actif ?',
+      `« ${asset.name} » sera retiré du portefeuille.`,
+      [
+        { text: 'Annuler', style: 'cancel', onPress: () => ref.current?.close() },
+        { text: 'Supprimer', style: 'destructive', onPress: () => del.mutate(asset.id) },
+      ],
+      { cancelable: true, onDismiss: () => ref.current?.close() },
+    )
+  }
+
+  const renderRightActions = () => (
+    <Pressable onPress={askDelete} style={({ pressed }) => [styles.deleteAction, pressed && { opacity: 0.85 }]}>
+      <Feather name="trash-2" size={22} color={color.white} />
+      <Text style={styles.deleteTxt}>Supprimer</Text>
+    </Pressable>
+  )
+
+  return (
+    <Swipeable
+      ref={ref}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      rightThreshold={40}
+      friction={2}
+    >
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.row, !first && styles.border, pressed && styles.pressed]}
+      >
+        <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
+          <Text style={[styles.logoTxt, { color: cat.color }]}>{asset.name.slice(0, 3).toUpperCase()}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name} numberOfLines={1}>{asset.name}</Text>
+          <Text style={styles.cat}>{cat.label}{asset.institution ? ` · ${asset.institution}` : ''}</Text>
+        </View>
+        <View style={{ alignItems: 'flex-end', gap: 4 }}>
+          <Text style={styles.val}>{eur(asset.value)}</Text>
+          {typeof pnl === 'number' ? <FxPill dir={pnl >= 0 ? 'up' : 'down'} label={`${Math.abs(pnl).toFixed(1)} %`} /> : null}
+        </View>
+      </Pressable>
+    </Swipeable>
+  )
+}
+
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
   center: { paddingVertical: 60, alignItems: 'center' },
   muted: { fontFamily: font.body, fontSize: 13.5, color: color.inkSoft },
   err: { fontFamily: font.bodyMed, fontSize: 13.5, color: color.down },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, backgroundColor: 'transparent' },
   border: { borderTopWidth: 1, borderTopColor: color.hair2 },
   pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   logo: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
@@ -101,4 +148,10 @@ const styles = StyleSheet.create({
   name: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink },
   cat: { fontFamily: font.mono, fontSize: 10, letterSpacing: 0.4, textTransform: 'uppercase', color: color.inkFaint, marginTop: 2 },
   val: { fontFamily: font.bodySemi, fontSize: 14.5, color: color.ink, fontVariant: ['tabular-nums'] },
+  deleteAction: {
+    width: 96, alignItems: 'center', justifyContent: 'center', gap: 4,
+    backgroundColor: color.down, borderRadius: radius.sm,
+    marginLeft: 8, marginVertical: 4,
+  },
+  deleteTxt: { fontFamily: font.bodySemi, fontSize: 11, color: color.white, letterSpacing: 0.3 },
 })
