@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { color, radius, shadow, font, accentGradient, dangerGradient } from '@/theme/tokens'
+import { tapLight, tapMedium } from '@/lib/haptics'
 
 type Variant = 'primary' | 'ghost' | 'danger'
 type Size = 'md' | 'sm' | 'tiny'
@@ -26,10 +27,18 @@ export function FxButton({
   const px = size === 'tiny' ? 15 : size === 'sm' ? 18 : 20
   const r = size === 'tiny' ? 18 : 24
 
+  // Haptic au tap : ghost = léger, primary/danger = medium (action engageante).
+  const handlePress = onPress
+    ? () => {
+        variant === 'ghost' ? tapLight() : tapMedium()
+        onPress()
+      }
+    : undefined
+
   if (variant === 'ghost') {
     return (
       <Pressable
-        onPress={onPress}
+        onPress={handlePress}
         style={({ pressed }) => [
           styles.base,
           styles.ghost,
@@ -46,7 +55,7 @@ export function FxButton({
   const colors = variant === 'danger' ? dangerGradient : accentGradient
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] }, style]}
     >
       <LinearGradient

@@ -5,6 +5,7 @@ import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
+import { Touchable } from '@/components/ui/Touchable'
 import { useSearch } from '@/lib/queries'
 import { eur } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
@@ -46,10 +47,10 @@ export default function Explorer() {
               <FxCard>
                 <FxCardHeader title="Actifs" sub={`${r.assets.length}`} />
                 {r.assets.map((a, i) => (
-                  <Pressable key={a.id} onPress={() => router.push(`/product/${a.id}` as Href)} style={[styles.row, i > 0 && styles.border]}>
+                  <Touchable key={a.id} onPress={() => router.push(`/product/${a.id}` as Href)} style={[styles.row, i > 0 && styles.border]}>
                     <Text style={styles.name} numberOfLines={1}>{a.name}</Text>
                     <Text style={styles.val}>{eur(a.value)}</Text>
-                  </Pressable>
+                  </Touchable>
                 ))}
               </FxCard>
             ) : null}

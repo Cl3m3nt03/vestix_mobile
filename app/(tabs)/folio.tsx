@@ -14,6 +14,7 @@ import { AddAsset } from '@/components/forms/AddAsset'
 import { useStats, useAssets, useDeleteAsset } from '@/lib/queries'
 import type { AssetType, Asset } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
+import { tapLight } from '@/lib/haptics'
 import { color, font, radius } from '@/theme/tokens'
 
 const ACTION_WIDTH = 96
@@ -132,7 +133,10 @@ function AssetRow({
       friction={2}
     >
       <Pressable
-        onPress={onPress}
+        onPress={() => {
+          tapLight()
+          onPress()
+        }}
         style={({ pressed }) => [styles.row, !first && styles.border, pressed && styles.pressed]}
       >
         <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>

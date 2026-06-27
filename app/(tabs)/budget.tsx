@@ -13,6 +13,7 @@ import { AddBudgetItem } from '@/components/forms/AddBudgetItem'
 import { useBudget } from '@/lib/queries'
 import type { BudgetCategory, BudgetItem } from '@/lib/types'
 import { eur } from '@/lib/format'
+import { tapLight } from '@/lib/haptics'
 import { color, font } from '@/theme/tokens'
 
 const CATS: Record<BudgetCategory, { label: string; color: string; icon: keyof typeof Feather.glyphMap }> = {
@@ -114,7 +115,10 @@ export default function Budget() {
                         {list.map((it, i) => (
                           <Animated.View key={it.id} entering={FadeInUp.duration(240).delay(i * 30)}>
                             <Pressable
-                              onPress={() => setEditing(it)}
+                              onPress={() => {
+                                tapLight()
+                                setEditing(it)
+                              }}
                               style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
                             >
                               <View style={[styles.dot, { backgroundColor: CATS[c].color }]} />
@@ -206,9 +210,15 @@ function FluxRow({
   onPress?: () => void
 }) {
   const Wrapper: any = onPress ? Pressable : View
+  const handlePress = onPress
+    ? () => {
+        tapLight()
+        onPress()
+      }
+    : undefined
   return (
     <Wrapper
-      onPress={onPress}
+      onPress={handlePress}
       style={onPress
         ? ({ pressed }: { pressed: boolean }) => [styles.fluxRow, pressed && styles.pressed]
         : styles.fluxRow}

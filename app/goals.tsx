@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl, Pressable } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import { useRouter } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
+import { Touchable } from '@/components/ui/Touchable'
 import { AddGoal } from '@/components/forms/AddGoal'
 import { useGoals, useStats } from '@/lib/queries'
 import type { Goal } from '@/lib/types'
@@ -40,7 +41,7 @@ export default function Goals() {
           goals.data!.map((g) => {
             const pct = g.targetValue > 0 ? Math.min(100, (total / g.targetValue) * 100) : 0
             return (
-              <Pressable key={g.id} onPress={() => setEditing(g)}>
+              <Touchable key={g.id} onPress={() => setEditing(g)}>
               <FxCard>
                 <FxCardHeader title={g.name} sub={g.targetDate ? `Échéance ${dateFr(g.targetDate)}` : undefined} />
                 <View style={styles.rowBetween}>
@@ -52,7 +53,7 @@ export default function Goals() {
                 </View>
                 <Text style={styles.pct}>{pct.toFixed(0)} %</Text>
               </FxCard>
-              </Pressable>
+              </Touchable>
             )
           })
         )}

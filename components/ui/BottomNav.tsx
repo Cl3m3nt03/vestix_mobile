@@ -1,13 +1,67 @@
+import { useEffect } from 'react'
 import { Platform, StyleSheet, Text, Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  interpolate,
+} from 'react-native-reanimated'
 import { color, font, shadow } from '@/theme/tokens'
+import { tapLight } from '@/lib/haptics'
 
 export type NavItem = { key: string; label: string; icon: (active: boolean) => React.ReactNode }
 
+const SPRING = { damping: 14, stiffness: 220, mass: 0.6 }
+
+/** Un onglet — anim ressort de l'icône active + apparition du fond teinté. */
+function NavSlot({ item, active, onPress }: { item: NavItem; active: boolean; onPress: () => void }) {
+  const a = useSharedValue(active ? 1 : 0)
+  const press = useSharedValue(0)
+
+  useEffect(() => {
+    a.value = withSpring(active ? 1 : 0, SPRING)
+  }, [active])
+
+  const wrapStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(0,128,76,${a.value * 0.12})`,
+    transform: [
+      { scale: interpolate(a.value, [0, 1], [1, 1.06]) * (1 - press.value * 0.12) },
+      { translateY: interpolate(a.value, [0, 1], [0, -1]) },
+    ],
+  }))
+
+  const lblStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(a.value, [0, 1], [0.85, 1]),
+  }))
+
+  return (
+    <Pressable
+      key={item.key}
+      onPress={() => {
+        tapLight()
+        onPress()
+      }}
+      onPressIn={() => (press.value = withTiming(1, { duration: 90 }))}
+      onPressOut={() => (press.value = withTiming(0, { duration: 140 }))}
+      style={styles.slot}
+    >
+      <Animated.View style={[styles.iconWrap, wrapStyle]}>{item.icon(active)}</Animated.View>
+      <Animated.Text
+        style={[styles.lbl, lblStyle, { color: active ? color.acc : color.inkSoft }]}
+        numberOfLines={1}
+      >
+        {item.label}
+      </Animated.Text>
+    </Pressable>
+  )
+}
+
 /**
  * Barre de navigation basse — reproduit le rail web en mode mobile (≤640px) :
- * 4 onglets primaires + « Plus ». Actif = teinte émeraude DISCRÈTE
- * (fond accTint, texte acc), pas le gros pill dégradé du desktop.
+ * 4 onglets primaires + « Plus ». Actif = teinte émeraude DISCRÈTE animée
+ * (fond accTint en ressort, icône scale), + haptic léger au tap.
  */
 export function BottomNav({
   items,
@@ -21,17 +75,9 @@ export function BottomNav({
   const insets = useSafeAreaInsets()
   return (
     <View style={[styles.bar, { paddingBottom: 7 + insets.bottom }]}>
-      {items.map((it) => {
-        const on = it.key === active
-        return (
-          <Pressable key={it.key} onPress={() => onSelect(it.key)} style={styles.slot}>
-            <View style={[styles.iconWrap, on && styles.iconWrapOn]}>{it.icon(on)}</View>
-            <Text style={[styles.lbl, { color: on ? color.acc : color.inkSoft }]} numberOfLines={1}>
-              {it.label}
-            </Text>
-          </Pressable>
-        )
-      })}
+      {items.map((it) => (
+        <NavSlot key={it.key} item={it} active={it.key === active} onPress={() => onSelect(it.key)} />
+      ))}
     </View>
   )
 }
@@ -62,6 +108,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconWrapOn: { backgroundColor: color.accTint },
   lbl: { fontFamily: font.bodySemi, fontSize: 10, lineHeight: 12 },
 })

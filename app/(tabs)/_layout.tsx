@@ -26,7 +26,7 @@ export default function TabsLayout() {
     <>
       <MoreSheet visible={moreOpen} onClose={() => setMoreOpen(false)} />
       <Tabs
-        screenOptions={{ headerShown: false }}
+        screenOptions={{ headerShown: false, animation: 'shift' }}
         tabBar={({ state, navigation }) => {
           const items: NavItem[] = state.routes.map((r) => ({
             key: r.name,

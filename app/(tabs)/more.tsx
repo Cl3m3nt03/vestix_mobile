@@ -1,9 +1,10 @@
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { useRouter, type Href } from 'expo-router'
 import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard } from '@/components/ui/FxCard'
+import { Touchable } from '@/components/ui/Touchable'
 import { FxButton } from '@/components/ui/FxButton'
 import { useMe } from '@/lib/queries'
 import { useAuth } from '@/lib/auth-context'
@@ -48,15 +49,16 @@ export default function More() {
 
         <FxCard style={{ padding: 8 }}>
           {LINKS.map((l, i) => (
-            <Pressable
+            <Touchable
               key={l.label}
+              disabled={!l.href}
               onPress={() => l.href && router.push(l.href as Href)}
               style={[styles.link, i > 0 && styles.border, !l.href && { opacity: 0.45 }]}
             >
               <Feather name={l.icon} size={19} color={color.inkSoft} />
               <Text style={styles.linkTxt}>{l.label}</Text>
               <Feather name="chevron-right" size={18} color={color.inkFaint} />
-            </Pressable>
+            </Touchable>
           ))}
         </FxCard>
 

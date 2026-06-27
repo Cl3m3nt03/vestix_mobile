@@ -10,6 +10,7 @@ import { AddTransaction } from '@/components/forms/AddTransaction'
 import { useTransactions } from '@/lib/queries'
 import type { TxType, Transaction } from '@/lib/types'
 import { eur, dateFr } from '@/lib/format'
+import { tapLight } from '@/lib/haptics'
 import { color, font } from '@/theme/tokens'
 
 const TX: Record<TxType, { label: string; icon: keyof typeof Feather.glyphMap; color: string; sign: number }> = {
@@ -51,7 +52,10 @@ export default function Transactions() {
               return (
                 <Animated.View key={t.id} entering={FadeInUp.duration(260).delay(Math.min(i, 12) * 28)}>
                   <Pressable
-                    onPress={() => setEditing(t)}
+                    onPress={() => {
+                      tapLight()
+                      setEditing(t)
+                    }}
                     style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
                   >
                     <View style={[styles.ico, { backgroundColor: meta.color + '22' }]}>

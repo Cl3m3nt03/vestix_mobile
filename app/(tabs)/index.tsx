@@ -12,6 +12,8 @@ import { Donut, Slice } from '@/components/ui/Donut'
 import { useStats, useAssets, useMe } from '@/lib/queries'
 import type { AssetType } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
+import { Touchable } from '@/components/ui/Touchable'
+import { tapMedium } from '@/lib/haptics'
 import { color, font, accentGradient, shadow } from '@/theme/tokens'
 
 export default function Dashboard() {
@@ -44,11 +46,11 @@ export default function Dashboard() {
             <Text style={styles.eyebrow}>VESTIX</Text>
             <Text style={styles.h1}>Patrimoine</Text>
           </View>
-          <Pressable style={styles.avatar} onPress={() => router.push('/settings' as Href)}>
+          <Touchable style={styles.avatar} onPress={() => router.push('/settings' as Href)}>
             <Text style={styles.avatarTxt}>
               {(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}
             </Text>
-          </Pressable>
+          </Touchable>
         </View>
 
         {loading ? (
@@ -132,7 +134,13 @@ export default function Dashboard() {
         <View style={{ height: 16 }} />
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => router.push('/assistant' as Href)}>
+      <Pressable
+        onPress={() => {
+          tapMedium()
+          router.push('/assistant' as Href)
+        }}
+        style={({ pressed }) => [styles.fab, pressed && { transform: [{ scale: 0.92 }] }]}
+      >
         <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fabInner}>
           <Feather name="message-circle" size={24} color={color.white} />
         </LinearGradient>
