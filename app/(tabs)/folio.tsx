@@ -22,7 +22,7 @@ const ACTION_WIDTH = 96
 
 export default function Folio() {
   const router = useRouter()
-  const { accent } = useTheme()
+  const { accent, ramp } = useTheme()
   const stats = useStats()
   const assets = useAssets()
   const loading = stats.isLoading || assets.isLoading
@@ -32,11 +32,18 @@ export default function Folio() {
 
   const [add, setAdd] = useState(false)
 
-  const slices: Slice[] = stats.data
+  // Donut + dots des lignes partagent la même teinte par type d'actif
+  // (dégradé du thème), pour que le graphe et la liste restent cohérents.
+  const tintByType: Partial<Record<AssetType, string>> = {}
+  const slices: Slice[] = (stats.data
     ? (Object.entries(stats.data.breakdown) as [AssetType, number][])
         .filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ label: CAT[k].label, value: v, color: CAT[k].color }))
     : []
+  ).map(([k, v], i) => {
+    const c = ramp[i % ramp.length]
+    tintByType[k] = c
+    return { label: CAT[k].label, value: v, color: c }
+  })
 
   return (
     <AppShell>
@@ -67,6 +74,7 @@ export default function Folio() {
                   <AssetRow
                     asset={a}
                     first={i === 0}
+                    tint={tintByType[a.type] ?? ramp[0]}
                     onPress={() => router.push(`/product/${a.id}` as Href)}
                   />
                 </Animated.View>
@@ -82,10 +90,11 @@ export default function Folio() {
 
 /** Ligne d'actif avec swipe-to-delete vers la gauche (action poubelle rouge). */
 function AssetRow({
-  asset, first, onPress,
+  asset, first, tint, onPress,
 }: {
   asset: Asset
   first: boolean
+  tint: string
   onPress: () => void
 }) {
   const cat = CAT[asset.type] ?? CAT.OTHER
@@ -141,8 +150,8 @@ function AssetRow({
         }}
         style={({ pressed }) => [styles.row, !first && styles.border, pressed && styles.pressed]}
       >
-        <View style={[styles.logo, { backgroundColor: cat.color + '22' }]}>
-          <Text style={[styles.logoTxt, { color: cat.color }]}>{asset.name.slice(0, 3).toUpperCase()}</Text>
+        <View style={[styles.logo, { backgroundColor: tint + '22' }]}>
+          <Text style={[styles.logoTxt, { color: tint }]}>{asset.name.slice(0, 3).toUpperCase()}</Text>
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.name} numberOfLines={1}>{asset.name}</Text>

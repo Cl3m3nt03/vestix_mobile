@@ -67,14 +67,16 @@ export type Accent = {
   accBr: string    // haut du dégradé (clair)
   accWash: string  // lavis moyen
   accTint: string  // fond très clair (état actif discret, icônes)
-  gradient: readonly [string, string] // boutons / héros : accBr → acc2
+  gradient: readonly [string, string]       // boutons / héros : accBr → acc2
+  bg: readonly [string, string, string]     // fond d'écran global (AppShell)
+  blob: readonly [string, string]           // 2 blobs décoratifs du fond
 }
 
 export const ACCENTS: Record<ThemeKey, Accent> = {
-  emerald: { acc: '#00804c', acc2: '#006b3c', acc3: '#005833', accBr: '#009259', accWash: '#cff6e0', accTint: '#e1f9ec', gradient: ['#009259', '#006b3c'] },
-  orange:  { acc: '#e07b1e', acc2: '#c9650f', acc3: '#a8530c', accBr: '#f0a23a', accWash: '#fbe0c4', accTint: '#fdeede', gradient: ['#f0a23a', '#d97014'] },
-  violet:  { acc: '#6b5fd6', acc2: '#574bc0', acc3: '#463aa0', accBr: '#8b7ff0', accWash: '#ddd7f7', accTint: '#ece9fc', gradient: ['#8b7ff0', '#574bc0'] },
-  blue:    { acc: '#2487c9', acc2: '#1a6fab', acc3: '#155a8c', accBr: '#3fa3e0', accWash: '#cbe6f7', accTint: '#e2f1fb', gradient: ['#3fa3e0', '#1a6fab'] },
+  emerald: { acc: '#00804c', acc2: '#006b3c', acc3: '#005833', accBr: '#009259', accWash: '#cff6e0', accTint: '#e1f9ec', gradient: ['#009259', '#006b3c'], bg: ['#dff7eb', '#dff5fc', '#efede7'], blob: ['#bff0d6', '#cfe4ff'] },
+  orange:  { acc: '#e07b1e', acc2: '#c9650f', acc3: '#a8530c', accBr: '#f0a23a', accWash: '#fbe0c4', accTint: '#fdeede', gradient: ['#f0a23a', '#d97014'], bg: ['#fdeede', '#fef1e4', '#efede7'], blob: ['#ffd9a8', '#ffe6c4'] },
+  violet:  { acc: '#6b5fd6', acc2: '#574bc0', acc3: '#463aa0', accBr: '#8b7ff0', accWash: '#ddd7f7', accTint: '#ece9fc', gradient: ['#8b7ff0', '#574bc0'], bg: ['#ece9fc', '#efeefb', '#efede7'], blob: ['#cfc8fa', '#dcd6f7'] },
+  blue:    { acc: '#2487c9', acc2: '#1a6fab', acc3: '#155a8c', accBr: '#3fa3e0', accWash: '#cbe6f7', accTint: '#e2f1fb', gradient: ['#3fa3e0', '#1a6fab'], bg: ['#e2f1fb', '#e9f4fc', '#efede7'], blob: ['#a9d8f4', '#c4e6f9'] },
 }
 
 /* Libellé + pastille pour le sélecteur de thème (page Réglages). */

@@ -27,7 +27,7 @@ const CATS: Record<BudgetCategory, { label: string; color: string; icon: keyof t
 type Tab = 'repartition' | 'flux'
 
 export default function Budget() {
-  const { accent } = useTheme()
+  const { accent, ramp } = useTheme()
   const q = useBudget()
   const items = q.data?.items ?? []
   const income = q.data?.income ?? 0
@@ -38,11 +38,18 @@ export default function Budget() {
   const [tab, setTab] = useState<Tab>('repartition')
   const close = () => { setAdd(false); setEditing(null) }
 
+  // Teinte par catégorie de budget — dégradé du thème, stable par catégorie
+  // (espacée dans le ramp pour le contraste). Donut + dots partagent la map.
+  const catTint = {} as Record<BudgetCategory, string>
+  ;(Object.keys(CATS) as BudgetCategory[]).forEach((c, i) => {
+    catTint[c] = ramp[(i * 2) % ramp.length]
+  })
+
   const slices: Slice[] = (Object.keys(CATS) as BudgetCategory[])
     .map((c) => ({
       label: CATS[c].label,
       value: items.filter((it) => it.category === c).reduce((s, it) => s + it.amount, 0),
-      color: CATS[c].color,
+      color: catTint[c],
     }))
     .filter((s) => s.value > 0)
 
@@ -123,7 +130,7 @@ export default function Budget() {
                               }}
                               style={({ pressed }) => [styles.row, i > 0 && styles.border, pressed && styles.pressed]}
                             >
-                              <View style={[styles.dot, { backgroundColor: CATS[c].color }]} />
+                              <View style={[styles.dot, { backgroundColor: catTint[c] }]} />
                               <Text style={styles.name} numberOfLines={1}>{it.label}</Text>
                               <Text style={styles.val}>{eur(it.amount)}</Text>
                             </Pressable>
@@ -158,13 +165,14 @@ export default function Budget() {
                 ) : (
                   fluxWithBalance.map((it, i) => {
                     const cat = CATS[it.category]
+                    const ct = catTint[it.category]
                     return (
                       <Animated.View key={it.id} entering={FadeInUp.duration(240).delay(i * 25)}>
                         <FluxRow
                           pillLabel={String(it.dayOfMonth)}
-                          pillBg={cat.color + '22'}
-                          pillTxt={cat.color}
-                          icon={<Feather name={cat.icon} size={14} color={cat.color} />}
+                          pillBg={ct + '22'}
+                          pillTxt={ct}
+                          icon={<Feather name={cat.icon} size={14} color={ct} />}
                           title={it.label}
                           sub={cat.label}
                           amount={it.amount}

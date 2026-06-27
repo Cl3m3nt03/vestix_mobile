@@ -13,7 +13,7 @@ import { color, font } from '@/theme/tokens'
 
 export default function Report() {
   const router = useRouter()
-  const { accent } = useTheme()
+  const { accent, ramp } = useTheme()
   const stats = useStats()
   const perf = usePerformance(12)
   const fiscal = useFiscal()
@@ -26,7 +26,7 @@ export default function Report() {
   const slices: Slice[] = stats.data
     ? (Object.entries(stats.data.breakdown) as [AssetType, number][])
         .filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ label: CAT[k].label, value: v, color: CAT[k].color }))
+        .map(([k, v], i) => ({ label: CAT[k].label, value: v, color: ramp[i % ramp.length] }))
     : []
 
   const perfLast = perf.data?.portfolio?.length ? perf.data.portfolio[perf.data.portfolio.length - 1].value : null

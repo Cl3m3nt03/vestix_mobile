@@ -19,7 +19,7 @@ import { useTheme } from '@/lib/theme-context'
 
 export default function Dashboard() {
   const router = useRouter()
-  const { accent } = useTheme()
+  const { accent, ramp } = useTheme()
   const me = useMe()
   const stats = useStats()
   const assets = useAssets()
@@ -33,7 +33,7 @@ export default function Dashboard() {
     ? (Object.entries(stats.data.breakdown) as [AssetType, number][])
         .filter(([, v]) => v > 0)
         .sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ label: CAT[k].label, value: v, color: CAT[k].color }))
+        .map(([k, v], i) => ({ label: CAT[k].label, value: v, color: ramp[i % ramp.length] }))
     : []
 
   return (
