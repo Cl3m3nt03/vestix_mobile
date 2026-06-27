@@ -55,9 +55,19 @@ function AuthGate() {
         {/* (tabs) en fondu (changement de contexte), écrans secondaires en slide */}
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
-        {/* assistant : le rendu est un Sheet (slide depuis le bas), on désactive
-            l'animation de transition de route pour éviter le double slide. */}
-        <Stack.Screen name="assistant" options={{ animation: 'none' }} />
+        {/* assistant : le rendu est un Sheet (slide depuis le bas). Route en
+            transparentModal + fond transparent → le dashboard reste visible
+            DERRIÈRE le backdrop du Sheet (sinon on verrait le fond crème opaque
+            de la route, pas l'écran précédent). animation 'none' : c'est le
+            Sheet (reanimated) qui anime, pas la transition de route. */}
+        <Stack.Screen
+          name="assistant"
+          options={{
+            presentation: 'transparentModal',
+            animation: 'none',
+            contentStyle: { backgroundColor: 'transparent' },
+          }}
+        />
       </Stack>
     </ErrorBoundary>
   )
