@@ -9,6 +9,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated'
 import { color, font, shadow } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { tapLight } from '@/lib/haptics'
 
 export type NavItem = { key: string; label: string; icon: (active: boolean) => React.ReactNode }
@@ -17,6 +18,7 @@ const SPRING = { damping: 14, stiffness: 220, mass: 0.6 }
 
 /** Un onglet — anim ressort de l'icône active + apparition du fond teinté. */
 function NavSlot({ item, active, onPress }: { item: NavItem; active: boolean; onPress: () => void }) {
+  const { accent } = useTheme()
   const a = useSharedValue(active ? 1 : 0)
   const press = useSharedValue(0)
 
@@ -24,14 +26,15 @@ function NavSlot({ item, active, onPress }: { item: NavItem; active: boolean; on
     a.value = withSpring(active ? 1 : 0, SPRING)
   }, [active])
 
+  // Fond teinté en couche séparée (opacité animée) → la teinte du thème
+  // s'applique sans recalcul de chaîne rgba, et n'affecte pas l'icône.
+  const bgStyle = useAnimatedStyle(() => ({ opacity: a.value }))
   const wrapStyle = useAnimatedStyle(() => ({
-    backgroundColor: `rgba(0,128,76,${a.value * 0.12})`,
     transform: [
       { scale: interpolate(a.value, [0, 1], [1, 1.06]) * (1 - press.value * 0.12) },
       { translateY: interpolate(a.value, [0, 1], [0, -1]) },
     ],
   }))
-
   const lblStyle = useAnimatedStyle(() => ({
     opacity: interpolate(a.value, [0, 1], [0.85, 1]),
   }))
@@ -47,9 +50,14 @@ function NavSlot({ item, active, onPress }: { item: NavItem; active: boolean; on
       onPressOut={() => (press.value = withTiming(0, { duration: 140 }))}
       style={styles.slot}
     >
-      <Animated.View style={[styles.iconWrap, wrapStyle]}>{item.icon(active)}</Animated.View>
+      <Animated.View style={[styles.iconWrap, wrapStyle]}>
+        <Animated.View
+          style={[StyleSheet.absoluteFill, styles.iconBg, { backgroundColor: accent.accTint }, bgStyle]}
+        />
+        {item.icon(active)}
+      </Animated.View>
       <Animated.Text
-        style={[styles.lbl, lblStyle, { color: active ? color.acc : color.inkSoft }]}
+        style={[styles.lbl, lblStyle, { color: active ? accent.acc : color.inkSoft }]}
         numberOfLines={1}
       >
         {item.label}
@@ -107,6 +115,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  iconBg: { borderRadius: 14 },
   lbl: { fontFamily: font.bodySemi, fontSize: 10, lineHeight: 12 },
 })

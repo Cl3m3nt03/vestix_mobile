@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { BottomNav, NavItem } from '@/components/ui/BottomNav'
 import { MoreSheet } from '@/components/MoreSheet'
+import { useTheme } from '@/lib/theme-context'
 import { color } from '@/theme/tokens'
 
 const ICON: Record<string, keyof typeof Feather.glyphMap> = {
@@ -21,6 +22,7 @@ const LABEL: Record<string, string> = {
 }
 
 export default function TabsLayout() {
+  const { accent } = useTheme()
   const [moreOpen, setMoreOpen] = useState(false)
   return (
     <>
@@ -32,7 +34,7 @@ export default function TabsLayout() {
             key: r.name,
             label: LABEL[r.name] ?? r.name,
             icon: (a: boolean) => (
-              <Feather name={ICON[r.name] ?? 'circle'} size={21} color={a ? color.acc : color.inkSoft} />
+              <Feather name={ICON[r.name] ?? 'circle'} size={21} color={a ? accent.acc : color.inkSoft} />
             ),
           }))
           const active = moreOpen ? 'more' : state.routes[state.index].name

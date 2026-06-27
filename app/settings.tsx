@@ -15,8 +15,12 @@ import { Field } from '@/components/ui/Field'
 import { useMe, useUpdateProfile, useAssets } from '@/lib/queries'
 import { api, ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
+import { useTheme } from '@/lib/theme-context'
+import { tapLight } from '@/lib/haptics'
 import { eur } from '@/lib/format'
-import { color, font, radius, shadow, accentGradient } from '@/theme/tokens'
+import { color, font, radius, shadow, THEME_META, type ThemeKey } from '@/theme/tokens'
+
+const THEME_ORDER: ThemeKey[] = ['emerald', 'orange', 'violet', 'blue']
 
 export default function Settings() {
   const router = useRouter()
@@ -25,6 +29,7 @@ export default function Settings() {
   const assets = useAssets()
   const update = useUpdateProfile()
   const { signOut } = useAuth()
+  const { key: themeKey, setTheme, accent } = useTheme()
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -127,8 +132,8 @@ export default function Settings() {
           <>
             {/* Hero profil */}
             <Animated.View entering={FadeInUp.duration(260)}>
-              <View style={styles.hero}>
-                <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg}>
+              <View style={[styles.hero, { shadowColor: accent.acc }]}>
+                <LinearGradient colors={accent.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg}>
                   <View style={styles.heroTop}>
                     <View style={styles.avatar}>
                       <Text style={styles.avatarTxt}>{initials}</Text>
@@ -166,13 +171,51 @@ export default function Settings() {
               eyebrow="IDENTITÉ"
               title="Profil"
               icon="user"
-              tone={color.acc}
+              tone={accent.acc}
               delay={80}
             >
               <Field label="Nom" value={name} onChangeText={setName} />
               <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-              {msg ? <Text style={styles.msg}>{msg}</Text> : null}
+              {msg ? <Text style={[styles.msg, { color: accent.acc }]}>{msg}</Text> : null}
               <FxButton label={update.isPending ? '…' : 'Enregistrer'} onPress={saveProfile} />
+            </Section>
+
+            {/* Section : Apparence — thème d'accent de l'app */}
+            <Section
+              eyebrow="APPARENCE"
+              title="Thème de couleur"
+              icon="droplet"
+              tone={accent.acc}
+              delay={100}
+            >
+              <Text style={styles.muted}>
+                Choisis la teinte d'accent de l'app. Appliquée partout, conservée sur cet appareil.
+              </Text>
+              <View style={styles.themeRow}>
+                {THEME_ORDER.map((k) => {
+                  const on = k === themeKey
+                  const sw = THEME_META[k].swatch
+                  return (
+                    <Pressable
+                      key={k}
+                      onPress={() => {
+                        tapLight()
+                        setTheme(k)
+                      }}
+                      style={styles.themeItem}
+                    >
+                      <View style={[styles.swatch, { borderColor: on ? sw : 'transparent' }]}>
+                        <View style={[styles.swatchFill, { backgroundColor: sw }]}>
+                          {on ? <Feather name="check" size={18} color={color.white} /> : null}
+                        </View>
+                      </View>
+                      <Text style={[styles.themeLbl, on && { color: sw, fontFamily: font.bodySemi }]}>
+                        {THEME_META[k].label}
+                      </Text>
+                    </Pressable>
+                  )
+                })}
+              </View>
             </Section>
 
             {/* Section : Sécurité */}
@@ -342,6 +385,16 @@ const styles = StyleSheet.create({
   sectionIco: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   sectionEyebrow: { fontFamily: font.mono, fontSize: 9.5, letterSpacing: 1.4, color: color.inkFaint },
   sectionTitle: { fontFamily: font.display, fontSize: 16, color: color.ink, marginTop: 2 },
+
+  // Theme picker (apparence)
+  themeRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  themeItem: { flex: 1, alignItems: 'center', gap: 7 },
+  swatch: {
+    width: 52, height: 52, borderRadius: 26, borderWidth: 2,
+    alignItems: 'center', justifyContent: 'center', padding: 3,
+  },
+  swatchFill: { flex: 1, alignSelf: 'stretch', borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  themeLbl: { fontFamily: font.bodyMed, fontSize: 12, color: color.inkSoft },
 
   // Status pill (sécurité)
   statusPill: {

@@ -14,10 +14,12 @@ import type { AssetType } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
 import { Touchable } from '@/components/ui/Touchable'
 import { tapMedium } from '@/lib/haptics'
-import { color, font, accentGradient, shadow } from '@/theme/tokens'
+import { color, font, shadow } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
 export default function Dashboard() {
   const router = useRouter()
+  const { accent } = useTheme()
   const me = useMe()
   const stats = useStats()
   const assets = useAssets()
@@ -39,14 +41,14 @@ export default function Dashboard() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={accent.acc} />}
       >
         <View style={styles.topbar}>
           <View>
             <Text style={styles.eyebrow}>VESTIX</Text>
             <Text style={styles.h1}>Patrimoine</Text>
           </View>
-          <Touchable style={styles.avatar} onPress={() => router.push('/settings' as Href)}>
+          <Touchable style={[styles.avatar, { backgroundColor: accent.acc3 }]} onPress={() => router.push('/settings' as Href)}>
             <Text style={styles.avatarTxt}>
               {(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}
             </Text>
@@ -71,7 +73,7 @@ export default function Dashboard() {
                 value={eur(stats.data!.totalValue)}
                 valueNum={stats.data!.totalValue}
                 format={(n) => eur(n)}
-                icon={<Feather name="layers" size={17} color={color.acc} />}
+                icon={<Feather name="layers" size={17} color={accent.acc} />}
                 trend={{
                   dir: stats.data!.totalPnl >= 0 ? 'up' : 'down',
                   text: `${stats.data!.totalPnlPercent >= 0 ? '+' : ''}${stats.data!.totalPnlPercent.toFixed(1)} %`,
@@ -82,7 +84,7 @@ export default function Dashboard() {
                 value={`${stats.data!.totalPnl >= 0 ? '+' : ''}${eur(stats.data!.totalPnl)}`}
                 valueNum={stats.data!.totalPnl}
                 format={(n) => `${n >= 0 ? '+' : ''}${eur(n)}`}
-                icon={<Feather name="trending-up" size={17} color={color.acc} />}
+                icon={<Feather name="trending-up" size={17} color={accent.acc} />}
                 sub={`Investi ${eur(stats.data!.totalInvested)}`}
               />
             </View>
@@ -141,7 +143,7 @@ export default function Dashboard() {
         }}
         style={({ pressed }) => [styles.fab, pressed && { transform: [{ scale: 0.92 }] }]}
       >
-        <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fabInner}>
+        <LinearGradient colors={accent.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fabInner}>
           <Feather name="message-circle" size={24} color={color.white} />
         </LinearGradient>
       </Pressable>

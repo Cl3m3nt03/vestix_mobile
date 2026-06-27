@@ -47,9 +47,43 @@ export const color = {
 export const bgGradient = ['#dff7eb', '#dff5fc', '#efede7'] as const
 /* Dégradé du « panneau » (bleu/violet pâle) pour zones secondaires */
 export const panelGradient = ['#d4ebff', '#e8e8ff', '#faeee4'] as const
-/* Dégradé accent (boutons, états actifs) : --acc-br → --acc-2 */
+/* Dégradé accent (boutons, états actifs) : --acc-br → --acc-2.
+   ⚠️ Émeraude par défaut — reste valable pour les usages STATIQUES (StyleSheet)
+   pas encore migrés vers useTheme(). Les surfaces migrées lisent ACCENTS[key]. */
 export const accentGradient = ['#009259', '#006b3c'] as const
 export const dangerGradient = ['#d8654f', '#c24a3f'] as const
+
+/* ============================================================
+   THÈMES D'ACCENT — l'utilisateur choisit la teinte de l'app
+   (émeraude par défaut + orange / violet / bleu). Seule la
+   FAMILLE ACCENT change ; texte (ink) et surfaces restent fixes.
+   ============================================================ */
+export type ThemeKey = 'emerald' | 'orange' | 'violet' | 'blue'
+
+export type Accent = {
+  acc: string      // accent principal (texte/icône actif, fonds pleins)
+  acc2: string     // bas du dégradé
+  acc3: string     // teinte la plus sombre
+  accBr: string    // haut du dégradé (clair)
+  accWash: string  // lavis moyen
+  accTint: string  // fond très clair (état actif discret, icônes)
+  gradient: readonly [string, string] // boutons / héros : accBr → acc2
+}
+
+export const ACCENTS: Record<ThemeKey, Accent> = {
+  emerald: { acc: '#00804c', acc2: '#006b3c', acc3: '#005833', accBr: '#009259', accWash: '#cff6e0', accTint: '#e1f9ec', gradient: ['#009259', '#006b3c'] },
+  orange:  { acc: '#e07b1e', acc2: '#c9650f', acc3: '#a8530c', accBr: '#f0a23a', accWash: '#fbe0c4', accTint: '#fdeede', gradient: ['#f0a23a', '#d97014'] },
+  violet:  { acc: '#6b5fd6', acc2: '#574bc0', acc3: '#463aa0', accBr: '#8b7ff0', accWash: '#ddd7f7', accTint: '#ece9fc', gradient: ['#8b7ff0', '#574bc0'] },
+  blue:    { acc: '#2487c9', acc2: '#1a6fab', acc3: '#155a8c', accBr: '#3fa3e0', accWash: '#cbe6f7', accTint: '#e2f1fb', gradient: ['#3fa3e0', '#1a6fab'] },
+}
+
+/* Libellé + pastille pour le sélecteur de thème (page Réglages). */
+export const THEME_META: Record<ThemeKey, { label: string; swatch: string }> = {
+  emerald: { label: 'Émeraude', swatch: '#00804c' },
+  orange:  { label: 'Orange',   swatch: '#e07b1e' },
+  violet:  { label: 'Violet',   swatch: '#6b5fd6' },
+  blue:    { label: 'Bleu',     swatch: '#2487c9' },
+}
 
 export const radius = {
   lg: 26,

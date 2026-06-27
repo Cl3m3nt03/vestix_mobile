@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { color, font, accentGradient, shadow } from '@/theme/tokens'
+import { color, font, shadow } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
-/** Chip / filtre. Actif = dégradé émeraude blanc. Équivalent natif de `.fx-chip`. */
+/** Chip / filtre. Actif = dégradé accent blanc. Équivalent natif de `.fx-chip`. */
 export function FxChip({
   label,
   active,
@@ -12,10 +13,11 @@ export function FxChip({
   active?: boolean
   onPress?: () => void
 }) {
+  const { accent } = useTheme()
   if (active) {
     return (
       <Pressable onPress={onPress}>
-        <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.chip, styles.active]}>
+        <LinearGradient colors={accent.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.chip, styles.active, { shadowColor: accent.acc }]}>
           <Text style={[styles.txt, { color: color.white }]}>{label}</Text>
         </LinearGradient>
       </Pressable>

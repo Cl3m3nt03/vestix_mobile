@@ -1,7 +1,8 @@
 import { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { color, radius, shadow, font, accentGradient, dangerGradient } from '@/theme/tokens'
+import { color, radius, shadow, font, dangerGradient } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { tapLight, tapMedium } from '@/lib/haptics'
 
 type Variant = 'primary' | 'ghost' | 'danger'
@@ -23,6 +24,7 @@ export function FxButton({
   icon?: ReactNode
   style?: ViewStyle
 }) {
+  const { accent } = useTheme()
   const h = size === 'tiny' ? 38 : size === 'sm' ? 44 : 46
   const px = size === 'tiny' ? 15 : size === 'sm' ? 18 : 20
   const r = size === 'tiny' ? 18 : 24
@@ -52,7 +54,7 @@ export function FxButton({
     )
   }
 
-  const colors = variant === 'danger' ? dangerGradient : accentGradient
+  const colors = variant === 'danger' ? dangerGradient : accent.gradient
   return (
     <Pressable
       onPress={handlePress}
@@ -62,7 +64,7 @@ export function FxButton({
         colors={colors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.base, styles.solid, { height: h, paddingHorizontal: px, borderRadius: r }]}
+        style={[styles.base, styles.solid, { height: h, paddingHorizontal: px, borderRadius: r, shadowColor: variant === 'danger' ? color.down : accent.acc }]}
       >
         {icon}
         <Text style={[styles.label, { color: color.white }]}>{label}</Text>

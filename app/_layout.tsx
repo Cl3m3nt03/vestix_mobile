@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/hanken-grotesk'
 import { JetBrainsMono_400Regular, JetBrainsMono_600SemiBold } from '@expo-google-fonts/jetbrains-mono'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
+import { ThemeProvider } from '@/lib/theme-context'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 SplashScreen.preventAutoHideAsync()
@@ -95,8 +96,10 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <StatusBar style="dark" />
-            <AuthGate />
+            <ThemeProvider>
+              <StatusBar style="dark" />
+              <AuthGate />
+            </ThemeProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

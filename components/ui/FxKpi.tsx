@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { color, radius, shadow, font } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { AnimatedNumber } from './AnimatedNumber'
 
 /**
@@ -25,11 +26,12 @@ export function FxKpi({
   icon?: ReactNode
   trend?: { dir: 'up' | 'down'; text: string }
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.kpi}>
       <View style={styles.top}>
         <Text style={styles.label}>{label}</Text>
-        {icon ? <View style={styles.ico}>{icon}</View> : null}
+        {icon ? <View style={[styles.ico, { backgroundColor: accent.accTint }]}>{icon}</View> : null}
       </View>
       {typeof valueNum === 'number' && format ? (
         <AnimatedNumber
