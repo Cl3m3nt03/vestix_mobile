@@ -7,10 +7,12 @@ import { FxCard } from '@/components/ui/FxCard'
 import { FxButton } from '@/components/ui/FxButton'
 import { login, ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Login() {
   const router = useRouter()
+  const { accent } = useTheme()
   const { setToken } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -41,7 +43,7 @@ export default function Login() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <View style={styles.logo}>
+            <View style={[styles.logo, { backgroundColor: accent.acc }]}>
               <Feather name="trending-up" size={22} color={color.white} />
             </View>
             <Text style={styles.name}>Vestix</Text>
@@ -75,10 +77,10 @@ export default function Login() {
             {!needs2FA ? (
               <View style={styles.links}>
                 <Pressable onPress={() => router.push('/forgot')}>
-                  <Text style={styles.link}>Mot de passe oublié ?</Text>
+                  <Text style={[styles.link, { color: accent.acc }]}>Mot de passe oublié ?</Text>
                 </Pressable>
                 <Pressable onPress={() => router.push('/register')}>
-                  <Text style={styles.link}>Créer un compte</Text>
+                  <Text style={[styles.link, { color: accent.acc }]}>Créer un compte</Text>
                 </Pressable>
               </View>
             ) : null}

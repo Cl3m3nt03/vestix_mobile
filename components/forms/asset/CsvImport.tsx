@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system/legacy'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { eur } from '@/lib/format'
 import { quickParseCsv, CsvRow } from './csv-parse'
 
@@ -19,6 +20,7 @@ export function CsvImport({
   fileName: string
   onParsed: (rows: CsvRow[], csvText: string, fileName: string) => void
 }) {
+  const { accent } = useTheme()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,9 +57,9 @@ export function CsvImport({
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>Fichier CSV</Text>
-      <Pressable onPress={pick} style={({ pressed }) => [styles.drop, pressed && styles.dropPressed]}>
+      <Pressable onPress={pick} style={({ pressed }) => [styles.drop, pressed && [styles.dropPressed, { borderColor: accent.acc }]]}>
         {loading
-          ? <ActivityIndicator color={color.acc} />
+          ? <ActivityIndicator color={accent.acc} />
           : <Feather name="upload" size={18} color={color.inkSoft} />}
         <Text style={styles.dropTxt} numberOfLines={1}>
           {loading ? 'Lecture du fichier…' : fileName || 'Sélectionner un fichier CSV'}
@@ -70,7 +72,7 @@ export function CsvImport({
             <Text style={styles.previewCount}>
               {rows.length} position{rows.length > 1 ? 's' : ''} détectée{rows.length > 1 ? 's' : ''}
             </Text>
-            <Text style={styles.previewTotal}>{eur(total, 0)}</Text>
+            <Text style={[styles.previewTotal, { color: accent.acc }]}>{eur(total, 0)}</Text>
           </View>
           {rows.slice(0, 8).map((r, i) => (
             <View key={i} style={[styles.previewRow, i > 0 && styles.previewBorder]}>

@@ -14,6 +14,7 @@ import { useBudget } from '@/lib/queries'
 import type { BudgetCategory, BudgetItem } from '@/lib/types'
 import { eur } from '@/lib/format'
 import { tapLight } from '@/lib/haptics'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 const CATS: Record<BudgetCategory, { label: string; color: string; icon: keyof typeof Feather.glyphMap }> = {
@@ -26,6 +27,7 @@ const CATS: Record<BudgetCategory, { label: string; color: string; icon: keyof t
 type Tab = 'repartition' | 'flux'
 
 export default function Budget() {
+  const { accent } = useTheme()
   const q = useBudget()
   const items = q.data?.items ?? []
   const income = q.data?.income ?? 0
@@ -63,12 +65,12 @@ export default function Budget() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Budget" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {q.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : q.error ? (
           <FxCard><Text style={styles.err}>{String((q.error as Error).message)}</Text></FxCard>
         ) : (
@@ -88,8 +90,8 @@ export default function Budget() {
               value={tab}
               onChange={setTab}
               items={[
-                { id: 'repartition', label: 'Répartition', icon: <Feather name="pie-chart" size={13} color={tab === 'repartition' ? color.acc : color.inkSoft} /> },
-                { id: 'flux',        label: 'Flux mensuel', icon: <Feather name="calendar"  size={13} color={tab === 'flux'        ? color.acc : color.inkSoft} /> },
+                { id: 'repartition', label: 'Répartition', icon: <Feather name="pie-chart" size={13} color={tab === 'repartition' ? accent.acc : color.inkSoft} /> },
+                { id: 'flux',        label: 'Flux mensuel', icon: <Feather name="calendar"  size={13} color={tab === 'flux'        ? accent.acc : color.inkSoft} /> },
               ]}
             />
 
@@ -140,8 +142,8 @@ export default function Budget() {
 
                 <FluxRow
                   pillLabel="J-1"
-                  pillBg={color.accTint}
-                  pillTxt={color.acc}
+                  pillBg={accent.accTint}
+                  pillTxt={accent.acc}
                   title="Salaire / Revenus"
                   sub="Début du mois"
                   amount={income}

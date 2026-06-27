@@ -5,6 +5,7 @@ import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard } from '@/components/ui/FxCard'
 import { Touchable } from '@/components/ui/Touchable'
+import { useTheme } from '@/lib/theme-context'
 import { FxButton } from '@/components/ui/FxButton'
 import { useMe } from '@/lib/queries'
 import { useAuth } from '@/lib/auth-context'
@@ -28,6 +29,7 @@ const LINKS: { icon: keyof typeof Feather.glyphMap; label: string; href?: string
 export default function More() {
   const me = useMe()
   const router = useRouter()
+  const { accent } = useTheme()
   const { signOut } = useAuth()
 
   return (
@@ -37,7 +39,7 @@ export default function More() {
 
         <FxCard>
           <View style={styles.profile}>
-            <View style={styles.avatar}>
+            <View style={[styles.avatar, { backgroundColor: accent.acc3 }]}>
               <Text style={styles.avatarTxt}>{(me.data?.name ?? me.data?.email ?? '?').slice(0, 2).toUpperCase()}</Text>
             </View>
             <View style={{ flex: 1 }}>

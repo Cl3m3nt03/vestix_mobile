@@ -15,12 +15,14 @@ import { useStats, useAssets, useDeleteAsset } from '@/lib/queries'
 import type { AssetType, Asset } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
 import { tapLight } from '@/lib/haptics'
+import { useTheme } from '@/lib/theme-context'
 import { color, font, radius } from '@/theme/tokens'
 
 const ACTION_WIDTH = 96
 
 export default function Folio() {
   const router = useRouter()
+  const { accent } = useTheme()
   const stats = useStats()
   const assets = useAssets()
   const loading = stats.isLoading || assets.isLoading
@@ -42,12 +44,12 @@ export default function Folio() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Portefeuille" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {loading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : error ? (
           <FxCard><Text style={styles.err}>{String((error as Error).message)}</Text></FxCard>
         ) : (

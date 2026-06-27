@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { color, font, radius, shadow } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { CAT, TYPE_EMOJI } from '@/lib/format'
 import type { AssetType } from '@/lib/types'
 
@@ -11,6 +12,7 @@ const TYPES: AssetType[] = [
 
 /** Phase 1 du wizard : grille 3×3 des types d'actif. */
 export function TypeGrid({ value, onChange }: { value: AssetType | null; onChange: (t: AssetType) => void }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.grid}>
       {TYPES.map((t) => {
@@ -21,14 +23,14 @@ export function TypeGrid({ value, onChange }: { value: AssetType | null; onChang
             onPress={() => onChange(t)}
             style={({ pressed }) => [
               styles.cell,
-              active && styles.cellActive,
+              active && [styles.cellActive, { borderColor: accent.acc, backgroundColor: accent.accTint, shadowColor: accent.acc }],
               pressed && styles.cellPressed,
             ]}
           >
-            <View style={[styles.iconBox, active && styles.iconBoxActive]}>
+            <View style={[styles.iconBox, active && { backgroundColor: accent.accWash }]}>
               <Text style={styles.icon}>{TYPE_EMOJI[t]}</Text>
             </View>
-            <Text style={[styles.label, active && styles.labelActive]}>{CAT[t].label}</Text>
+            <Text style={[styles.label, active && { color: accent.acc }]}>{CAT[t].label}</Text>
           </Pressable>
         )
       })}

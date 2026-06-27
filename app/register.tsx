@@ -7,10 +7,12 @@ import { FxCard } from '@/components/ui/FxCard'
 import { FxButton } from '@/components/ui/FxButton'
 import { Field } from '@/components/ui/Field'
 import { api, ApiError } from '@/lib/api'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Register() {
   const router = useRouter()
+  const { accent } = useTheme()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,7 +50,7 @@ export default function Register() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <View style={styles.logo}><Feather name="trending-up" size={22} color={color.white} /></View>
+            <View style={[styles.logo, { backgroundColor: accent.acc }]}><Feather name="trending-up" size={22} color={color.white} /></View>
             <Text style={styles.name}>Créer un compte</Text>
           </View>
 
@@ -60,7 +62,7 @@ export default function Register() {
                 <Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
                 <Text style={styles.hint}>8 caractères min., 1 majuscule, 1 chiffre.</Text>
                 <Pressable onPress={() => setConsent((c) => !c)} style={styles.consent}>
-                  <View style={[styles.box, consent && styles.boxOn]}>
+                  <View style={[styles.box, consent && { backgroundColor: accent.acc, borderColor: accent.acc }]}>
                     {consent ? <Feather name="check" size={14} color={color.white} /> : null}
                   </View>
                   <Text style={styles.consentTxt}>J’accepte la politique de confidentialité (RGPD).</Text>
@@ -79,7 +81,7 @@ export default function Register() {
           </FxCard>
 
           <Pressable onPress={() => router.replace('/login')} style={styles.link}>
-            <Text style={styles.linkTxt}>Déjà un compte ? Se connecter</Text>
+            <Text style={[styles.linkTxt, { color: accent.acc }]}>Déjà un compte ? Se connecter</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>

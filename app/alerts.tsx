@@ -14,10 +14,12 @@ import { Select } from '@/components/ui/Select'
 import { useAlerts, useAddAlert, useDeleteAlert } from '@/lib/queries'
 import { eur } from '@/lib/format'
 import { ApiError } from '@/lib/api'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Alerts() {
   const router = useRouter()
+  const { accent } = useTheme()
   const q = useAlerts()
   const add = useAddAlert()
   const del = useDeleteAlert()
@@ -53,7 +55,7 @@ export default function Alerts() {
         <ScreenHeader eyebrow="VESTIX" title="Alertes" onBack={() => router.back()} right={<AddButton onPress={() => setOpen(true)} />} />
 
         {q.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : q.error ? (
           <FxCard><Text style={styles.err}>{String((q.error as Error).message)}</Text></FxCard>
         ) : !q.data!.length ? (

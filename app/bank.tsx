@@ -13,10 +13,12 @@ import { Sheet } from '@/components/ui/Sheet'
 import { useBankConnections, useBankTransactions, useInstitutions, useConnectBank, useSyncBank } from '@/lib/queries'
 import { ApiError } from '@/lib/api'
 import { eur, dateFr } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Bank() {
   const router = useRouter()
+  const { accent } = useTheme()
   const conns = useBankConnections()
   const txs = useBankTransactions()
   const sync = useSyncBank()
@@ -48,10 +50,10 @@ export default function Bank() {
             value={q} onChangeText={setQ} autoFocus />
         </View>
         {err ? <Text style={styles.err}>{err}</Text> : null}
-        {insts.isLoading ? <ActivityIndicator color={color.acc} style={{ marginTop: 16 }} /> : null}
+        {insts.isLoading ? <ActivityIndicator color={accent.acc} style={{ marginTop: 16 }} /> : null}
         {insts.data?.map((b) => (
           <Pressable key={b.id} onPress={() => onConnect(b.id, b.name)} style={styles.bankRow}>
-            <Feather name="home" size={18} color={color.acc} />
+            <Feather name="home" size={18} color={accent.acc} />
             <Text style={styles.bankName}>{b.name}</Text>
             <Feather name="chevron-right" size={18} color={color.inkFaint} />
           </Pressable>
@@ -63,7 +65,7 @@ export default function Bank() {
         <ScreenHeader eyebrow="VESTIX" title="Banques" onBack={() => router.back()} right={<AddButton onPress={() => setPick(true)} />} />
 
         {conns.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : conns.error ? (
           <FxCard><Text style={styles.err}>{String((conns.error as Error).message)}</Text></FxCard>
         ) : !conns.data!.length ? (

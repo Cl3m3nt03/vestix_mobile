@@ -57,7 +57,7 @@ export default function Dashboard() {
 
         {loading ? (
           <View style={styles.centerBox}>
-            <ActivityIndicator color={color.acc} />
+            <ActivityIndicator color={accent.acc} />
             <Text style={styles.muted}>Connexion au serveur…</Text>
           </View>
         ) : error ? (

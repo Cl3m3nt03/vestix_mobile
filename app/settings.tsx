@@ -127,7 +127,7 @@ export default function Settings() {
         <ScreenHeader eyebrow="VESTIX" title="Réglages" onBack={() => router.back()} />
 
         {me.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : (
           <>
             {/* Hero profil */}

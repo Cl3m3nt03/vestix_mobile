@@ -8,12 +8,14 @@ import { FxKpi } from '@/components/ui/FxKpi'
 import { Field } from '@/components/ui/Field'
 import { LineChart } from '@/components/ui/LineChart'
 import { eur } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 const num = (s: string) => Number(s.replace(',', '.')) || 0
 
 export default function Simulator() {
   const router = useRouter()
+  const { accent } = useTheme()
   const [initial, setInitial] = useState('1000')
   const [monthly, setMonthly] = useState('200')
   const [rate, setRate] = useState('7')
@@ -55,7 +57,7 @@ export default function Simulator() {
 
         <FxCard>
           <FxCardHeader title="Projection" sub={`${years} ANS`} />
-          <LineChart series={[{ label: 'Capital', color: color.acc, points: sim.curve }]} />
+          <LineChart series={[{ label: 'Capital', color: accent.acc, points: sim.curve }]} />
         </FxCard>
         <View style={{ height: 16 }} />
       </ScrollView>

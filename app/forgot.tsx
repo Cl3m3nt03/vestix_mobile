@@ -7,10 +7,12 @@ import { FxCard } from '@/components/ui/FxCard'
 import { FxButton } from '@/components/ui/FxButton'
 import { Field } from '@/components/ui/Field'
 import { api, ApiError } from '@/lib/api'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Forgot() {
   const router = useRouter()
+  const { accent } = useTheme()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -32,7 +34,7 @@ export default function Forgot() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <View style={styles.logo}><Feather name="lock" size={22} color={color.white} /></View>
+            <View style={[styles.logo, { backgroundColor: accent.acc }]}><Feather name="lock" size={22} color={color.white} /></View>
             <Text style={styles.name}>Mot de passe oublié</Text>
           </View>
 
@@ -53,7 +55,7 @@ export default function Forgot() {
           </FxCard>
 
           <Pressable onPress={() => router.replace('/login')} style={styles.link}>
-            <Text style={styles.linkTxt}>Retour à la connexion</Text>
+            <Text style={[styles.linkTxt, { color: accent.acc }]}>Retour à la connexion</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>

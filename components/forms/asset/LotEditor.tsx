@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { eur } from '@/lib/format'
 
 /** Un lot = un achat. Conservé individuellement (rachats successifs). */
@@ -24,6 +25,7 @@ export function LotEditor({
   currency: string
   onChange: (lots: LotDraft[]) => void
 }) {
+  const { accent } = useTheme()
   const [showOld, setShowOld] = useState(false)
 
   const updateLot = (i: number, patch: Partial<LotDraft>) =>
@@ -99,8 +101,8 @@ export function LotEditor({
           Lots{lots.length > 1 ? <Text style={styles.headCount}> · {lots.length}</Text> : null}
         </Text>
         <Pressable onPress={addLot} hitSlop={6} style={styles.addBtn}>
-          <Feather name="plus" size={13} color={color.acc} />
-          <Text style={styles.addTxt}>Ajouter un lot</Text>
+          <Feather name="plus" size={13} color={accent.acc} />
+          <Text style={[styles.addTxt, { color: accent.acc }]}>Ajouter un lot</Text>
         </Pressable>
       </View>
 
@@ -130,11 +132,11 @@ export function LotEditor({
       )}
 
       {totalQty > 0 && (
-        <View style={styles.summary}>
-          <Text style={styles.summaryLabel}>
+        <View style={[styles.summary, { backgroundColor: accent.accTint, borderColor: accent.acc }]}>
+          <Text style={[styles.summaryLabel, { color: accent.acc3 }]}>
             Position consolidée · {lots.length} lot{lots.length > 1 ? 's' : ''}
           </Text>
-          <Text style={styles.summaryValue}>
+          <Text style={[styles.summaryValue, { color: accent.acc }]}>
             {totalQty.toLocaleString('fr-FR')} × {eur(weightedPru, 2)}
           </Text>
         </View>

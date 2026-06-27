@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, Image } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import { useAssetSearch, usePrices } from '@/lib/queries'
 import { eur } from '@/lib/format'
 import type { AssetType, AssetSearchResult } from '@/lib/types'
@@ -21,6 +22,7 @@ export function SearchPicker({
   onSelect: (r: AssetSearchResult) => void
   onClear: () => void
 }) {
+  const { accent } = useTheme()
   const [q, setQ] = useState('')
   const [debounced, setDebounced] = useState('')
   const [open, setOpen] = useState(false)
@@ -49,7 +51,7 @@ export function SearchPicker({
         <Text style={styles.label}>
           {isCrypto ? 'Rechercher une crypto-monnaie' : 'Rechercher un titre boursier'}
         </Text>
-        {isISIN ? <Text style={styles.isinBadge}>ISIN détecté</Text> : null}
+        {isISIN ? <Text style={[styles.isinBadge, { color: accent.acc, backgroundColor: accent.accTint, borderColor: accent.acc }]}>ISIN détecté</Text> : null}
       </View>
 
       <View style={styles.inputRow}>
@@ -98,7 +100,7 @@ export function SearchPicker({
                 <View style={styles.resultTopRow}>
                   <Text style={styles.resultSymbol} numberOfLines={1}>{r.symbol}</Text>
                   {r.marketCapRank ? <Text style={styles.rank}>#{r.marketCapRank}</Text> : null}
-                  {r.isin ? <Text style={styles.isinSmall}>{r.isin}</Text> : null}
+                  {r.isin ? <Text style={[styles.isinSmall, { color: accent.acc, backgroundColor: accent.accTint }]}>{r.isin}</Text> : null}
                 </View>
                 <Text style={styles.resultName} numberOfLines={1}>{r.name}</Text>
               </View>

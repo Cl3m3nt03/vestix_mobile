@@ -6,10 +6,12 @@ import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { FxKpi } from '@/components/ui/FxKpi'
 import { useFiscal } from '@/lib/queries'
 import { eur, dateFr } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Fiscal() {
   const router = useRouter()
+  const { accent } = useTheme()
   const q = useFiscal()
   const d = q.data
 
@@ -18,12 +20,12 @@ export default function Fiscal() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title={`Fiscalité ${d?.year ?? ''}`} onBack={() => router.back()} />
 
         {q.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : q.error ? (
           <FxCard><Text style={styles.err}>{String((q.error as Error).message)}</Text></FxCard>
         ) : (

@@ -7,7 +7,8 @@ import { Sheet } from '@/components/ui/Sheet'
 import { useMe, useStats } from '@/lib/queries'
 import { useAuth } from '@/lib/auth-context'
 import { eur } from '@/lib/format'
-import { color, font, radius, shadow, accentGradient } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
+import { color, font, radius, shadow } from '@/theme/tokens'
 
 type Tone = 'acc' | 'pop' | 'violet' | 'info' | 'down' | 'd2'
 
@@ -64,6 +65,7 @@ const SECTIONS: { title: string; eyebrow: string; links: Link[] }[] = [
 /** Feuille « Plus » — hero profil + 3 sections groupées avec micro-cards. */
 export function MoreSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const router = useRouter()
+  const { accent } = useTheme()
   const me = useMe()
   const stats = useStats()
   const { signOut } = useAuth()
@@ -75,8 +77,8 @@ export function MoreSheet({ visible, onClose }: { visible: boolean; onClose: () 
     <Sheet visible={visible} onClose={onClose} title="Plus">
       {/* Hero profil */}
       <Animated.View entering={FadeInUp.duration(260)}>
-        <Pressable onPress={() => go('/settings')} style={({ pressed }) => [styles.hero, pressed && { opacity: 0.95 }]}>
-          <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg}>
+        <Pressable onPress={() => go('/settings')} style={({ pressed }) => [styles.hero, { shadowColor: accent.acc }, pressed && { opacity: 0.95 }]}>
+          <LinearGradient colors={accent.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg}>
             <View style={styles.heroRow}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarTxt}>{initials}</Text>
@@ -128,7 +130,7 @@ export function MoreSheet({ visible, onClose }: { visible: boolean; onClose: () 
           </View>
           <View style={styles.grid}>
             {section.links.map((l, i) => {
-              const tone = TONE[l.tone]
+              const tone = l.tone === 'acc' ? { bg: accent.accTint, fg: accent.acc } : TONE[l.tone]
               return (
                 <Animated.View
                   key={l.href}
@@ -137,7 +139,7 @@ export function MoreSheet({ visible, onClose }: { visible: boolean; onClose: () 
                 >
                   <Pressable
                     onPress={() => go(l.href)}
-                    style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
+                    style={({ pressed }) => [styles.cell, pressed && [styles.cellPressed, { borderColor: accent.acc }]]}
                   >
                     <View style={[styles.cellIco, { backgroundColor: tone.bg }]}>
                       <Feather name={l.icon} size={18} color={tone.fg} />

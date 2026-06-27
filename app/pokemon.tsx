@@ -7,10 +7,12 @@ import { FxKpi } from '@/components/ui/FxKpi'
 import { LineChart } from '@/components/ui/LineChart'
 import { useHoloStatus, useHoloData } from '@/lib/queries'
 import { eur } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Pokemon() {
   const router = useRouter()
+  const { accent } = useTheme()
   const status = useHoloStatus()
   const data = useHoloData()
 
@@ -27,12 +29,12 @@ export default function Pokemon() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={data.isRefetching} onRefresh={() => { status.refetch(); data.refetch() }} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={data.isRefetching} onRefresh={() => { status.refetch(); data.refetch() }} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Collection TCG" onBack={() => router.back()} />
 
         {status.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : !connected ? (
           <FxCard>
             <Text style={styles.muted}>

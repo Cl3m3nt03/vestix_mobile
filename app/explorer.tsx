@@ -6,12 +6,14 @@ import { AppShell } from '@/components/ui/AppShell'
 import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { Touchable } from '@/components/ui/Touchable'
+import { useTheme } from '@/lib/theme-context'
 import { useSearch } from '@/lib/queries'
 import { eur } from '@/lib/format'
 import { color, font } from '@/theme/tokens'
 
 export default function Explorer() {
   const router = useRouter()
+  const { accent } = useTheme()
   const [q, setQ] = useState('')
   const search = useSearch(q)
   const r = search.data
@@ -38,7 +40,7 @@ export default function Explorer() {
         {q.trim().length < 2 ? (
           <Text style={styles.hint}>Tape au moins 2 caractères.</Text>
         ) : search.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : !r || (!r.assets.length && !r.transactions.length && !r.goals.length) ? (
           <Text style={styles.hint}>Aucun résultat.</Text>
         ) : (

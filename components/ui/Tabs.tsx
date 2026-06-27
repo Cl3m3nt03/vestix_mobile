@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
 export interface TabItem<T extends string> {
   id: T
@@ -19,6 +20,7 @@ export function Tabs<T extends string>({
   value: T
   onChange: (id: T) => void
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.bar}>
       {items.map((it) => {
@@ -29,12 +31,12 @@ export function Tabs<T extends string>({
             onPress={() => onChange(it.id)}
             style={({ pressed }) => [
               styles.tab,
-              active && styles.tabActive,
+              active && [styles.tabActive, { backgroundColor: accent.accTint, borderColor: accent.accWash }],
               pressed && !active && { opacity: 0.85 },
             ]}
           >
             {it.icon}
-            <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>
+            <Text style={[styles.label, active && { color: accent.acc }]} numberOfLines={1}>
               {it.label}
             </Text>
           </Pressable>

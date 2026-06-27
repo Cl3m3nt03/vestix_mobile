@@ -7,6 +7,7 @@ import { useAddAsset, useEditAsset, useDeleteAsset, useAssets, usePrices } from 
 import { api, ApiError } from '@/lib/api'
 import { eur, CAT, TYPE_EMOJI } from '@/lib/format'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 import type { Asset, AssetType, AssetSearchResult } from '@/lib/types'
 
 import { TypeGrid } from './asset/TypeGrid'
@@ -58,6 +59,7 @@ export function AddAsset({
   onClose: () => void
   editing?: Asset | null
 }) {
+  const { accent } = useTheme()
   const add = useAddAsset()
   const edit = useEditAsset()
   const del = useDeleteAsset()
@@ -266,9 +268,9 @@ export function AddAsset({
           <Text style={styles.methodIntro}>Avez-vous un fichier d'export de vos positions ?</Text>
           <Pressable
             onPress={() => { setCsvMode(true); setPhase('form') }}
-            style={({ pressed }) => [styles.methodCard, pressed && styles.methodPressed]}
+            style={({ pressed }) => [styles.methodCard, pressed && [styles.methodPressed, { borderColor: accent.acc, backgroundColor: accent.accTint }]]}
           >
-            <View style={styles.methodIco}><Feather name="upload" size={18} color={color.acc} /></View>
+            <View style={[styles.methodIco, { backgroundColor: accent.accTint }]}><Feather name="upload" size={18} color={accent.acc} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.methodTitle}>Importer un CSV</Text>
               <Text style={styles.methodSub}>
@@ -278,7 +280,7 @@ export function AddAsset({
           </Pressable>
           <Pressable
             onPress={() => { setCsvMode(false); setPhase('form') }}
-            style={({ pressed }) => [styles.methodCard, pressed && styles.methodPressed]}
+            style={({ pressed }) => [styles.methodCard, pressed && [styles.methodPressed, { borderColor: accent.acc, backgroundColor: accent.accTint }]]}
           >
             <View style={[styles.methodIco, { backgroundColor: color.glass2 }]}>
               <Feather name="search" size={18} color={color.inkSoft} />
@@ -338,7 +340,7 @@ export function AddAsset({
 
               {livePrices.isFetching && selected ? (
                 <View style={styles.priceFetch}>
-                  <ActivityIndicator size="small" color={color.acc} />
+                  <ActivityIndicator size="small" color={accent.acc} />
                   <Text style={styles.priceFetchTxt}>Récupération du cours…</Text>
                 </View>
               ) : null}
@@ -409,9 +411,9 @@ export function AddAsset({
                     />
                   </View>
                   {quantity && unitPrice ? (
-                    <View style={styles.totalCard}>
-                      <Text style={styles.totalLabel}>Valeur totale</Text>
-                      <Text style={styles.totalValue}>{eur(totalValue, 2)}</Text>
+                    <View style={[styles.totalCard, { backgroundColor: accent.accTint, borderColor: accent.acc }]}>
+                      <Text style={[styles.totalLabel, { color: accent.acc3 }]}>Valeur totale</Text>
+                      <Text style={[styles.totalValue, { color: accent.acc }]}>{eur(totalValue, 2)}</Text>
                     </View>
                   ) : null}
                 </>
@@ -623,15 +625,16 @@ export function AddAsset({
 /* ── Sous-helpers UI ───────────────────────────────────────────── */
 
 function CurrencySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.currencyRow}>
       {CURRENCIES.map((c) => (
         <Pressable
           key={c}
           onPress={() => onChange(c)}
-          style={({ pressed }) => [styles.currencyChip, value === c && styles.currencyChipActive, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.currencyChip, value === c && { borderColor: accent.acc, backgroundColor: accent.accTint }, pressed && { opacity: 0.85 }]}
         >
-          <Text style={[styles.currencyTxt, value === c && styles.currencyTxtActive]}>{c}</Text>
+          <Text style={[styles.currencyTxt, value === c && { color: accent.acc }]}>{c}</Text>
         </Pressable>
       ))}
     </View>
@@ -645,21 +648,22 @@ function LinkedAssetPicker({
   onChange: (id: string) => void
   options: { id: string; name: string }[]
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.linkedRow}>
       <Pressable
         onPress={() => onChange('')}
-        style={({ pressed }) => [styles.linkedChip, value === '' && styles.linkedChipActive, pressed && { opacity: 0.85 }]}
+        style={({ pressed }) => [styles.linkedChip, value === '' && { borderColor: accent.acc, backgroundColor: accent.accTint }, pressed && { opacity: 0.85 }]}
       >
-        <Text style={[styles.linkedTxt, value === '' && styles.linkedTxtActive]}>Aucun</Text>
+        <Text style={[styles.linkedTxt, value === '' && { color: accent.acc }]}>Aucun</Text>
       </Pressable>
       {options.map((o) => (
         <Pressable
           key={o.id}
           onPress={() => onChange(o.id)}
-          style={({ pressed }) => [styles.linkedChip, value === o.id && styles.linkedChipActive, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.linkedChip, value === o.id && { borderColor: accent.acc, backgroundColor: accent.accTint }, pressed && { opacity: 0.85 }]}
         >
-          <Text style={[styles.linkedTxt, value === o.id && styles.linkedTxtActive]} numberOfLines={1}>{o.name}</Text>
+          <Text style={[styles.linkedTxt, value === o.id && { color: accent.acc }]} numberOfLines={1}>{o.name}</Text>
         </Pressable>
       ))}
     </View>

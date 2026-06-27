@@ -11,6 +11,7 @@ import { useTransactions } from '@/lib/queries'
 import type { TxType, Transaction } from '@/lib/types'
 import { eur, dateFr } from '@/lib/format'
 import { tapLight } from '@/lib/haptics'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 const TX: Record<TxType, { label: string; icon: keyof typeof Feather.glyphMap; color: string; sign: number }> = {
@@ -22,6 +23,7 @@ const TX: Record<TxType, { label: string; icon: keyof typeof Feather.glyphMap; c
 }
 
 export default function Transactions() {
+  const { accent } = useTheme()
   const q = useTransactions()
   const [add, setAdd] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
@@ -34,12 +36,12 @@ export default function Transactions() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Transactions" right={<AddButton onPress={() => setAdd(true)} />} />
 
         {q.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : q.error ? (
           <FxCard><Text style={styles.err}>{String((q.error as Error).message)}</Text></FxCard>
         ) : !q.data!.length ? (

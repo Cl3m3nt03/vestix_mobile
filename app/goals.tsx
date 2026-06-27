@@ -6,6 +6,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { AddButton } from '@/components/ui/AddButton'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { Touchable } from '@/components/ui/Touchable'
+import { useTheme } from '@/lib/theme-context'
 import { AddGoal } from '@/components/forms/AddGoal'
 import { useGoals, useStats } from '@/lib/queries'
 import type { Goal } from '@/lib/types'
@@ -14,6 +15,7 @@ import { color, font } from '@/theme/tokens'
 
 export default function Goals() {
   const router = useRouter()
+  const { accent } = useTheme()
   const goals = useGoals()
   const stats = useStats()
   const [add, setAdd] = useState(false)
@@ -27,12 +29,12 @@ export default function Goals() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={goals.isRefetching} onRefresh={goals.refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={goals.isRefetching} onRefresh={goals.refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Objectifs" onBack={() => router.back()} right={<AddButton onPress={() => setAdd(true)} />} />
 
         {goals.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : goals.error ? (
           <FxCard><Text style={styles.err}>{String((goals.error as Error).message)}</Text></FxCard>
         ) : !goals.data!.length ? (
@@ -49,9 +51,9 @@ export default function Goals() {
                   <Text style={styles.tgt}>/ {eur(g.targetValue)}</Text>
                 </View>
                 <View style={styles.track}>
-                  <View style={[styles.fill, { width: `${pct}%` }]} />
+                  <View style={[styles.fill, { width: `${pct}%`, backgroundColor: accent.acc }]} />
                 </View>
-                <Text style={styles.pct}>{pct.toFixed(0)} %</Text>
+                <Text style={[styles.pct, { color: accent.acc }]}>{pct.toFixed(0)} %</Text>
               </FxCard>
               </Touchable>
             )

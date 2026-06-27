@@ -5,16 +5,18 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader'
 import { FxCard, FxCardHeader } from '@/components/ui/FxCard'
 import { LineChart, Series } from '@/components/ui/LineChart'
 import { usePerformance } from '@/lib/queries'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Performance() {
   const router = useRouter()
+  const { accent } = useTheme()
   const q = usePerformance(24)
 
   const last = (pts?: { value: number }[]) => (pts?.length ? pts[pts.length - 1].value : 0)
   const series: Series[] = q.data
     ? [
-        { label: 'Mon portefeuille', color: color.acc, points: q.data.portfolio },
+        { label: 'Mon portefeuille', color: accent.acc, points: q.data.portfolio },
         { label: 'CAC 40', color: color.info, points: q.data.cac40 },
         { label: 'S&P 500', color: color.pop, points: q.data.sp500 },
         { label: 'MSCI World', color: color.violet, points: q.data.msciWorld },
@@ -26,12 +28,12 @@ export default function Performance() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={q.refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Performance" onBack={() => router.back()} />
 
         {q.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : q.error ? (
           <FxCard><Text style={styles.err}>{String((q.error as Error).message)}</Text></FxCard>
         ) : (

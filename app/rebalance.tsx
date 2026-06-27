@@ -9,10 +9,12 @@ import { Field } from '@/components/ui/Field'
 import { useStats, useRebalance } from '@/lib/queries'
 import type { AssetType } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Rebalance() {
   const router = useRouter()
+  const { accent } = useTheme()
   const stats = useStats()
   const reb = useRebalance()
   const [targets, setTargets] = useState<Record<string, string>>({})
@@ -43,7 +45,7 @@ export default function Rebalance() {
         <ScreenHeader eyebrow="VESTIX" title="Rééquilibrage" onBack={() => router.back()} />
 
         {stats.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : (
           <>
             <FxCard>

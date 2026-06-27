@@ -8,10 +8,12 @@ import { Donut, Slice } from '@/components/ui/Donut'
 import { useStats, usePerformance, useFiscal, useAssets } from '@/lib/queries'
 import type { AssetType } from '@/lib/types'
 import { eur, CAT } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 export default function Report() {
   const router = useRouter()
+  const { accent } = useTheme()
   const stats = useStats()
   const perf = usePerformance(12)
   const fiscal = useFiscal()
@@ -35,12 +37,12 @@ export default function Report() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={color.acc} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} tintColor={accent.acc} />}
       >
         <ScreenHeader eyebrow="VESTIX" title="Rapport" onBack={() => router.back()} />
 
         {loading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : (
           <>
             <View style={styles.kpis}>

@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
 export const SAVINGS_PRESETS = [
   { name: 'Livret A',       institution: "Caisse d'Épargne",  notes: 'Taux réglementé : 3,00 %' },
@@ -35,6 +36,7 @@ export function SavingsPresets({
   selectedName: string
   onPick: (preset: typeof SAVINGS_PRESETS[number]) => void
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.grid2}>
       {SAVINGS_PRESETS.map((p) => {
@@ -43,10 +45,10 @@ export function SavingsPresets({
           <Pressable
             key={p.name}
             onPress={() => onPick(p)}
-            style={({ pressed }) => [styles.cell, active && styles.cellActive, pressed && styles.cellPressed]}
+            style={({ pressed }) => [styles.cell, active && [styles.cellActive, { borderColor: accent.acc, backgroundColor: accent.accTint }], pressed && styles.cellPressed]}
           >
-            <Text style={[styles.cellName, active && styles.cellNameActive]} numberOfLines={1}>{p.name}</Text>
-            {active ? <Feather name="check" size={14} color={color.acc} /> : null}
+            <Text style={[styles.cellName, active && { color: accent.acc }]} numberOfLines={1}>{p.name}</Text>
+            {active ? <Feather name="check" size={14} color={accent.acc} /> : null}
           </Pressable>
         )
       })}
@@ -61,6 +63,7 @@ export function BankPresets({
   selected: string
   onPick: (bank: string) => void
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.chipsRow}>
       {BANK_PRESETS.map((b) => {
@@ -69,9 +72,9 @@ export function BankPresets({
           <Pressable
             key={b}
             onPress={() => onPick(b)}
-            style={({ pressed }) => [styles.chip, active && styles.chipActive, pressed && styles.cellPressed]}
+            style={({ pressed }) => [styles.chip, active && [styles.chipActive, { borderColor: accent.acc, backgroundColor: accent.accTint }], pressed && styles.cellPressed]}
           >
-            <Text style={[styles.chipTxt, active && styles.chipTxtActive]}>{b}</Text>
+            <Text style={[styles.chipTxt, active && { color: accent.acc }]}>{b}</Text>
           </Pressable>
         )
       })}
@@ -86,6 +89,7 @@ export function RealEstatePresets({
   selectedName: string
   onPick: (preset: typeof REAL_ESTATE_PRESETS[number]) => void
 }) {
+  const { accent } = useTheme()
   return (
     <View style={styles.grid2}>
       {REAL_ESTATE_PRESETS.map((p) => {
@@ -94,10 +98,10 @@ export function RealEstatePresets({
           <Pressable
             key={p.name}
             onPress={() => onPick(p)}
-            style={({ pressed }) => [styles.cell, active && styles.cellActive, pressed && styles.cellPressed]}
+            style={({ pressed }) => [styles.cell, active && [styles.cellActive, { borderColor: accent.acc, backgroundColor: accent.accTint }], pressed && styles.cellPressed]}
           >
-            <Text style={[styles.cellName, active && styles.cellNameActive]} numberOfLines={1}>{p.name}</Text>
-            {active ? <Feather name="check" size={14} color={color.acc} /> : null}
+            <Text style={[styles.cellName, active && { color: accent.acc }]} numberOfLines={1}>{p.name}</Text>
+            {active ? <Feather name="check" size={14} color={accent.acc} /> : null}
           </Pressable>
         )
       })}

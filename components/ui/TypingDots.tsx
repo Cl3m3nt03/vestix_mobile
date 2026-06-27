@@ -10,8 +10,10 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated'
 import { color } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
 function Dot({ delay }: { delay: number }) {
+  const { accent } = useTheme()
   const op = useSharedValue(0.25)
   useEffect(() => {
     op.value = withDelay(
@@ -27,7 +29,7 @@ function Dot({ delay }: { delay: number }) {
     )
   }, [delay, op])
   const style = useAnimatedStyle(() => ({ opacity: op.value }))
-  return <Animated.View style={[styles.dot, style]} />
+  return <Animated.View style={[styles.dot, { backgroundColor: accent.acc }, style]} />
 }
 
 /** Trois points qui pulsent en cascade — indicateur « assistant tape… ». */

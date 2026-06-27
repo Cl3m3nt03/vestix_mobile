@@ -10,6 +10,7 @@ import { LineChart } from '@/components/ui/LineChart'
 import { AddAsset } from '@/components/forms/AddAsset'
 import { useAssets, useSparkline } from '@/lib/queries'
 import { eur, CAT } from '@/lib/format'
+import { useTheme } from '@/lib/theme-context'
 import { color, font } from '@/theme/tokens'
 
 const RANGES = [
@@ -22,6 +23,7 @@ const RANGES = [
 export default function Product() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const { accent } = useTheme()
   const assets = useAssets()
   const asset = assets.data?.find((a) => a.id === id)
   const symbol = asset?.holdings?.[0]?.symbol ?? null
@@ -39,14 +41,14 @@ export default function Product() {
           title={asset?.name ?? 'Actif'}
           onBack={() => router.back()}
           right={asset ? (
-            <Pressable onPress={() => setEdit(true)} hitSlop={8} style={styles.editBtn}>
-              <Feather name="edit-2" size={18} color={color.acc} />
+            <Pressable onPress={() => setEdit(true)} hitSlop={8} style={[styles.editBtn, { backgroundColor: accent.accTint }]}>
+              <Feather name="edit-2" size={18} color={accent.acc} />
             </Pressable>
           ) : undefined}
         />
 
         {assets.isLoading ? (
-          <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+          <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
         ) : !asset ? (
           <FxCard><Text style={styles.muted}>Actif introuvable.</Text></FxCard>
         ) : (
@@ -66,9 +68,9 @@ export default function Product() {
                   ))}
                 </View>
                 {spark.isLoading ? (
-                  <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+                  <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
                 ) : (
-                  <LineChart series={[{ label: symbol, color: color.acc, points: (spark.data?.prices ?? []).map((v) => ({ value: v })) }]} />
+                  <LineChart series={[{ label: symbol, color: accent.acc, points: (spark.data?.prices ?? []).map((v) => ({ value: v })) }]} />
                 )}
               </FxCard>
             ) : null}

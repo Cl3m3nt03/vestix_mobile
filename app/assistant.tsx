@@ -14,7 +14,8 @@ import { TypingDots } from '@/components/ui/TypingDots'
 import { useMe } from '@/lib/queries'
 import { sendChatStream, api, ApiError } from '@/lib/api'
 import type { ChatMessage } from '@/lib/types'
-import { color, font, radius, accentGradient } from '@/theme/tokens'
+import { color, font, radius } from '@/theme/tokens'
+import { useTheme } from '@/lib/theme-context'
 
 const SUGGESTIONS = [
   { icon: 'pie-chart' as const,   text: 'Mon allocation est-elle équilibrée ?' },
@@ -30,6 +31,7 @@ const SUGGESTIONS = [
  */
 export default function Assistant() {
   const router = useRouter()
+  const { accent } = useTheme()
   const qc = useQueryClient()
   const me = useMe()
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -86,13 +88,13 @@ export default function Assistant() {
   return (
     <Sheet visible onClose={() => router.back()} title="Assistant IA" bodyScroll={false} fullHeight>
       {me.isLoading ? (
-        <View style={styles.center}><ActivityIndicator color={color.acc} /></View>
+        <View style={styles.center}><ActivityIndicator color={accent.acc} /></View>
       ) : !consented ? (
         <Animated.View entering={FadeInUp.duration(280)} style={styles.consentPad}>
           <FxCard>
             <View style={styles.consentHead}>
-              <View style={styles.consentIco}>
-                <Feather name="shield" size={18} color={color.acc} />
+              <View style={[styles.consentIco, { backgroundColor: accent.accTint }]}>
+                <Feather name="shield" size={18} color={accent.acc} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.consentEyebrow}>RGPD</Text>
@@ -117,7 +119,7 @@ export default function Assistant() {
           >
             {!messages.length && !streaming ? (
               <Animated.View entering={FadeIn.duration(260)} style={styles.emptyWrap}>
-                <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.emptyBadge}>
+                <LinearGradient colors={accent.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.emptyBadge}>
                   <Feather name="message-circle" size={24} color={color.white} />
                 </LinearGradient>
                 <Text style={styles.emptyTitle}>Pose ta question finance</Text>
@@ -127,9 +129,9 @@ export default function Assistant() {
                 <View style={styles.suggestList}>
                   {SUGGESTIONS.map((s, i) => (
                     <Animated.View key={s.text} entering={FadeInUp.duration(260).delay(100 + i * 60)}>
-                      <Pressable onPress={() => send(s.text)} style={({ pressed }) => [styles.suggest, pressed && styles.suggestPressed]}>
-                        <View style={styles.suggestIco}>
-                          <Feather name={s.icon} size={14} color={color.acc} />
+                      <Pressable onPress={() => send(s.text)} style={({ pressed }) => [styles.suggest, pressed && [styles.suggestPressed, { borderColor: accent.acc }]]}>
+                        <View style={[styles.suggestIco, { backgroundColor: accent.accTint }]}>
+                          <Feather name={s.icon} size={14} color={accent.acc} />
                         </View>
                         <Text style={styles.suggestTxt}>{s.text}</Text>
                         <Feather name="arrow-up-right" size={13} color={color.inkFaint} />
@@ -142,7 +144,7 @@ export default function Assistant() {
 
             {messages.map((m, i) => (
               <Animated.View key={i} entering={FadeInUp.duration(220)}>
-                <View style={[styles.bubble, m.role === 'user' ? styles.user : styles.bot]}>
+                <View style={[styles.bubble, m.role === 'user' ? [styles.user, { backgroundColor: accent.acc }] : styles.bot]}>
                   <Text style={[styles.bubbleTxt, m.role === 'user' && { color: color.white }]}>{m.content}</Text>
                 </View>
               </Animated.View>
@@ -171,6 +173,7 @@ export default function Assistant() {
               onPress={() => send()}
               style={({ pressed }) => [
                 styles.sendBtn,
+                { backgroundColor: accent.acc },
                 (!input.trim() || streaming) && { opacity: 0.4 },
                 pressed && { transform: [{ scale: 0.94 }] },
               ]}
